@@ -10,6 +10,26 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
+// A volume for persistent data.
+type ServerVolume struct {
+	DataPath  string
+	MountPath string
+}
+
+// Environment variable to expose to the application.
+type ServerEnvVar struct {
+	Name  string
+	Value string
+}
+
+// Input for the server config.
+type ServerConfig struct {
+	Image   string
+	Ports   []nat.Port
+	Volumes []ServerVolume
+	Envs    []ServerEnvVar
+}
+
 // Creates a server container and starts it. Similar to `docker run`.
 func RunServer(ctx context.Context, cli *client.Client) (container.CreateResponse, error) {
 	// Create the container.
