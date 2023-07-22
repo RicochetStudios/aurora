@@ -33,10 +33,10 @@ type ServerMount string
 func NewServerMount(target string) (ServerMount, error) {
 	match, err := regexp.MatchString(`^/.*$`, target)
 	if err != nil {
-		return "", err
+		return ServerMount(""), err
 	} else if !match {
 		// If the target provided is not a valid unix path, error.
-		return "", errors.New("mount target '" + target + "' is not a valid path")
+		return ServerMount(""), errors.New("mount target '" + target + "' is not a valid path")
 	} else {
 		return ServerMount(target), nil
 	}
@@ -50,7 +50,7 @@ type ServerEnvVar struct {
 
 // NewServerEnvVar creates a new instance of ServerEnvVar given a name and value.
 func NewServerEnvVar(name, value string) (ServerEnvVar, error) {
-	match, err := regexp.MatchString(`[a-zA-Z_][a-zA-Z0-9_]*`, name)
+	match, err := regexp.MatchString(`^[a-zA-Z_][a-zA-Z0-9_]*$`, name)
 	if err != nil {
 		return ServerEnvVar{}, err
 	} else if !match {
