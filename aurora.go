@@ -19,8 +19,20 @@ func main() {
 
 	ctx := context.Background()
 
+	// Create container config.
+	config, err := NewContainerConfig(
+		"my-unique-id",
+		"nginx",
+		[]ServerPort{NewServerPort("tcp", "8080")},
+		[]ServerMount{},
+		[]ServerEnvVar{},
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Run an nginx container.
-	server, err := RunServer(ctx, cli)
+	server, err := RunServer(ctx, cli, config)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -64,30 +64,45 @@ func NewServerEnvVar(name, value string) (ServerEnvVar, error) {
 	}
 }
 
-// ServerConfig is a set of configurations for the server.
-type ServerConfig struct {
-	Image  string
-	Ports  []ServerPort
-	Mounts []ServerMount
-	Envs   []ServerEnvVar
-}
-
 // ContainerConfig is a set of configurations to pass to the docker engine to create the server container.
 type ContainerConfig struct {
-	Image  string
-	Ports  nat.PortSet
-	Mounts []mount.Mount
-	Env    []string
+	Name         string
+	Image        string
+	ExposedPorts nat.PortSet
+	Mounts       []mount.Mount
+	Env          []string
+}
+
+// NewContainerConfig creates a new ContainerConfig.
+func NewContainerConfig(name, image string, ports []ServerPort, mounts []ServerMount, env []ServerEnvVar) (ContainerConfig, error) {
+	containerPorts, err := NewContainerPorts(ports)
+	if err != nil {
+		return ContainerConfig{}, err
+	}
+
+	containerMounts := NewContainerMounts(mounts)
+
+	containerEnv := NewContainerEnv(env)
+
+	containerConfig := ContainerConfig{
+		Name:         name,
+		Image:        image,
+		ExposedPorts: containerPorts,
+		Mounts:       containerMounts,
+		Env:          containerEnv,
+	}
+
+	return containerConfig, nil
 }
 
 // NewContainerPortSet creates a nat.PortSet from a list of ServerPorts.
 func NewContainerPorts(serverPorts []ServerPort) (nat.PortSet, error) {
-	var containerPorts nat.PortSet
+	var containerPorts nat.PortSet = nat.PortSet{}
 
 	for _, portSet := range serverPorts {
 		natPort, err := nat.NewPort(portSet.Protocol, portSet.Port)
 		if err != nil {
-			return nil, err
+			return nat.PortSet{}, err
 		}
 
 		containerPorts[natPort] = struct{}{}
@@ -116,44 +131,24 @@ func NewContainerEnv(serverEnvVars []ServerEnvVar) []string {
 	var containerEnv []string
 
 	for _, envVar := range serverEnvVars {
-		var containerVar string
-		containerVar = envVar.Name + "=" + envVar.Value
+		var containerVar string = envVar.Name + "=" + envVar.Value
 		containerEnv = append(containerEnv, containerVar)
 	}
 
 	return containerEnv
 }
 
-// Converts a ServerConfig struct into a ContainerConfig struct.
-func (config ServerConfig) ToContainerConfig() (ContainerConfig, error) {
-	containerPorts, err := NewContainerPorts(config.Ports)
-	if err != nil {
-		return ContainerConfig{}, err
-	}
-
-	containerMounts := NewContainerMounts(config.Mounts)
-
-	containerEnv := NewContainerEnv(config.Envs)
-
-	containerConfig := ContainerConfig{
-		Image:  config.Image,
-		Ports:  containerPorts,
-		Mounts: containerMounts,
-		Env:    containerEnv,
-	}
-
-	return containerConfig, nil
-}
-
 // Creates a server container and starts it. Similar to `docker run`.
-func RunServer(ctx context.Context, cli *client.Client, config ServerConfig) (container.CreateResponse, error) {
+func RunServer(ctx context.Context, cli *client.Client, config ContainerConfig) (container.CreateResponse, error) {
 	// Create the container.
 	response, err := cli.ContainerCreate(ctx, &container.Config{
-		Image:        "nginx",
-		ExposedPorts: nat.PortSet{"8080": struct{}{}},
+		Image:        config.Image,
+		ExposedPorts: config.ExposedPorts,
 	}, &container.HostConfig{
-		PortBindings: map[nat.Port][]nat.PortBinding{nat.Port("8080"): {{HostIP: "127.0.0.1", HostPort: "8080"}}},
-	}, nil, nil, "nginx-go-cli")
+		Mounts: config.Mounts,
+		// Not sure if we need host bindings yet.
+		// PortBindings: map[nat.Port][]nat.PortBinding{nat.Port("8080"): {{HostIP: "127.0.0.1", HostPort: "8080"}}},
+	}, nil, nil, config.Name)
 	if err != nil {
 		return response, err
 	}
