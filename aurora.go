@@ -11,21 +11,25 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	// Constructs the client object.
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	ctx := context.Background()
+	defer cli.Close()
 
 	// Create container config.
 	config, err := NewContainerConfig(
 		"my-unique-id",
 		"nginx",
 		[]ServerPort{NewServerPort("tcp", "8080")},
-		[]ServerMount{},
-		[]ServerEnvVar{},
+		[]ServerVolume{"/data"},
+		[]ServerEnvVar{{
+			Name:  "name",
+			Value: "value",
+		}},
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -45,7 +49,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Outputs running containers.
+	// Outputs top 10 running containers.
 	for _, container := range containers {
 		fmt.Printf("%s %s\n", container.ID[:10], container.Image)
 	}

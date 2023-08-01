@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"errors"
+	"io"
+	"os"
 	"regexp"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 )
@@ -28,17 +29,17 @@ func NewServerPort(proto, port string) ServerPort {
 }
 
 // A volume for persistent data.
-type ServerMount string
+type ServerVolume string
 
-func NewServerMount(target string) (ServerMount, error) {
+func NewServerVolume(target string) (ServerVolume, error) {
 	match, err := regexp.MatchString(`^/.*$`, target)
 	if err != nil {
-		return ServerMount(""), err
+		return ServerVolume(""), err
 	} else if !match {
 		// If the target provided is not a valid unix path, error.
-		return ServerMount(""), errors.New("mount target '" + target + "' is not a valid path")
+		return ServerVolume(""), errors.New("mount target '" + target + "' is not a valid path")
 	} else {
-		return ServerMount(target), nil
+		return ServerVolume(target), nil
 	}
 }
 
@@ -69,18 +70,18 @@ type ContainerConfig struct {
 	Name         string
 	Image        string
 	ExposedPorts nat.PortSet
-	Mounts       []mount.Mount
+	Volumes      []string
 	Env          []string
 }
 
 // NewContainerConfig creates a new ContainerConfig.
-func NewContainerConfig(name, image string, ports []ServerPort, mounts []ServerMount, env []ServerEnvVar) (ContainerConfig, error) {
+func NewContainerConfig(name, image string, ports []ServerPort, volumes []ServerVolume, env []ServerEnvVar) (ContainerConfig, error) {
 	containerPorts, err := NewContainerPorts(ports)
 	if err != nil {
 		return ContainerConfig{}, err
 	}
 
-	containerMounts := NewContainerMounts(mounts)
+	containerVolumes := NewContainerVolumes(volumes)
 
 	containerEnv := NewContainerEnv(env)
 
@@ -88,7 +89,7 @@ func NewContainerConfig(name, image string, ports []ServerPort, mounts []ServerM
 		Name:         name,
 		Image:        image,
 		ExposedPorts: containerPorts,
-		Mounts:       containerMounts,
+		Volumes:      containerVolumes,
 		Env:          containerEnv,
 	}
 
@@ -111,19 +112,15 @@ func NewContainerPorts(serverPorts []ServerPort) (nat.PortSet, error) {
 	return containerPorts, nil
 }
 
-// NewContainerMounts creates a list of container mounts from a list of server mounts.
-func NewContainerMounts(serverMounts []ServerMount) []mount.Mount {
-	var containerMounts []mount.Mount
+// NewContainerVolumes creates a list of container volumes from a list of server volumes.
+func NewContainerVolumes(serverVolumes []ServerVolume) []string {
+	var containerVolumes []string
 
-	for _, mountTarget := range serverMounts {
-		containerMount := mount.Mount{
-			Source: string(mountTarget),
-			Target: string(mountTarget),
-		}
-		containerMounts = append(containerMounts, containerMount)
+	for _, volumeTarget := range serverVolumes {
+		containerVolumes = append(containerVolumes, string(volumeTarget))
 	}
 
-	return containerMounts
+	return containerVolumes
 }
 
 // NewContainerEnv creates a slice of container environment variables from a list of ServerEnvVars.
@@ -140,25 +137,35 @@ func NewContainerEnv(serverEnvVars []ServerEnvVar) []string {
 
 // Creates a server container and starts it. Similar to `docker run`.
 func RunServer(ctx context.Context, cli *client.Client, config ContainerConfig) (container.CreateResponse, error) {
+	// Pull the image.
+	out, err := cli.ImagePull(ctx, config.Image, types.ImagePullOptions{})
+	if err != nil {
+		panic(err)
+	}
+	defer out.Close()
+	// Output the download status.
+	io.Copy(os.Stdout, out)
+
 	// Create the container.
-	response, err := cli.ContainerCreate(ctx, &container.Config{
+	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image:        config.Image,
 		ExposedPorts: config.ExposedPorts,
 	}, &container.HostConfig{
-		Mounts: config.Mounts,
+		// Binds work the way that mounts would normally.
+		Binds: config.Volumes,
 		// Not sure if we need host bindings yet.
 		// PortBindings: map[nat.Port][]nat.PortBinding{nat.Port("8080"): {{HostIP: "127.0.0.1", HostPort: "8080"}}},
 	}, nil, nil, config.Name)
 	if err != nil {
-		return response, err
+		return resp, err
 	}
 
 	// Start the container.
-	if err := cli.ContainerStart(ctx, response.ID, types.ContainerStartOptions{}); err != nil {
-		return response, err
+	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		return resp, err
 	}
 
-	return response, nil
+	return resp, nil
 }
 
 // Stops and removes a server container.
