@@ -8,6 +8,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 )
 
 func main() {
@@ -20,16 +21,24 @@ func main() {
 	}
 	defer cli.Close()
 
+	// Create container environment variables.
+	env, _ := NewContainerEnvVar("name", "value")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Create container environment ports.
+	port, err := nat.NewPort("tcp", "8080")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Create container config.
 	config, err := NewContainerConfig(
 		"my-unique-id",
 		"nginx",
-		[]ServerPort{NewServerPort("tcp", "8080")},
-		[]ServerVolume{"/data"},
-		[]ServerEnvVar{{
-			Name:  "name",
-			Value: "value",
-		}},
+		nat.PortSet{port: struct{}{}},
+		[]string{"/data:/data"},
+		[]string{env},
 	)
 	if err != nil {
 		log.Fatal(err)

@@ -14,53 +14,33 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-// TestNewServerPort calls NewServerPort with a protocol and port,
-// checking for a valid ServerPort type to be returned.
-func TestNewServerPort(t *testing.T) {
-	var want ServerPort = ServerPort{Protocol: "tcp", Port: "8080"}
-	got := NewServerPort("tcp", "8080")
-	if want != got {
-		t.Fatalf(`NewServerPort("tcp", "8080") = %q, want match for %#q`, got, want)
-	}
-}
+// // TestNewServerPort calls NewServerPort with a protocol and port,
+// // checking for a valid ServerPort type to be returned.
+// func TestNewServerPort(t *testing.T) {
+// 	var want ServerPort = ServerPort{Protocol: "tcp", Port: "8080"}
+// 	got := NewServerPort("tcp", "8080")
+// 	if want != got {
+// 		t.Fatalf(`NewServerPort("tcp", "8080") = %q, want match for %#q`, got, want)
+// 	}
+// }
 
-// TestNewServerVolume calls NewServerVolume with a path,
-// checking for a valid ServerMount returned.
-func TestNewServerVolume(t *testing.T) {
-	var want ServerVolume = "/data"
-	got, err := NewServerVolume("/data")
-	if want != got || err != nil {
-		t.Fatalf(`NewServerVolume("/data") = %q, %v, want match for %#q, nil`, got, err, want)
-	}
-}
-
-// TestNewServerVolumeInvalidPath calls NewServerVolume with an invalid path,
-// checking for an error in return.
-func TestNewServerVolumeInvalidPath(t *testing.T) {
-	// Missing the directory path '/'.
-	_, err := NewServerVolume("data")
-	if err == nil {
-		t.Fatalf(`NewServerVolume("data") expected a mount target invalid error, got %T`, err)
-	}
-}
-
-// TestNewServerEnvVar calls NewServerEnvVar with a name and value,
-// checking for a valid ServerEnvVar in return.
-func TestNewServerEnvVar(t *testing.T) {
-	var want ServerEnvVar = ServerEnvVar{Name: "EULA", Value: "TRUE"}
-	got, err := NewServerEnvVar("EULA", "TRUE")
+// TestNewContainerEnvVar calls NewContainerEnvVar with a name and value,
+// checking for a valid string in return.
+func TestNewContainerEnvVar(t *testing.T) {
+	var want string = "EULA=TRUE"
+	got, err := NewContainerEnvVar("EULA", "TRUE")
 	if want != got || err != nil {
 		t.Fatalf(`NewServerVolume("EULA", "TRUE") = %q, %v, want match for %#q, nil`, got, err, want)
 	}
 }
 
-// TestNewServerEnvVarInvalidName calls NewServerEnvVar with an invalid name,
+// TestNewContainerEnvVarInvalidName calls NewContainerEnvVar with an invalid name,
 // checking for an error in return.
-func TestNewServerEnvVarInvalidName(t *testing.T) {
+func TestNewContainerEnvVarInvalidName(t *testing.T) {
 	// Add invalid characters to the env var name.
-	_, err := NewServerEnvVar("$EULA!", "TRUE")
+	_, err := NewContainerEnvVar("$EULA!", "TRUE")
 	if err == nil {
-		t.Fatalf(`NewServerEnvVar("$EULA!", "TRUE") expected a name invalid error while testing, got %T`, err)
+		t.Fatalf(`NewContainerEnvVar("$EULA!", "TRUE") expected a name invalid error while testing, got %T`, err)
 	}
 }
 
@@ -71,19 +51,16 @@ func TestNewContainerConfig(t *testing.T) {
 		"my-unique-id",
 		"nginx",
 		nat.PortSet{"8080/tcp": struct{}{}},
-		[]string{"/data"},
+		[]string{"/data:/data"},
 		[]string{"name=value"},
 	}
 
 	got, err := NewContainerConfig(
 		"my-unique-id",
 		"nginx",
-		[]ServerPort{NewServerPort("tcp", "8080")},
-		[]ServerVolume{"/data"},
-		[]ServerEnvVar{{
-			Name:  "name",
-			Value: "value",
-		}},
+		nat.PortSet{"8080/tcp": struct{}{}},
+		[]string{"/data:/data"},
+		[]string{"name=value"},
 	)
 
 	if err != nil {
@@ -140,7 +117,7 @@ func TestRunServer(t *testing.T) {
 		"my-unique-id",
 		"nginx",
 		nat.PortSet{"8080/tcp": struct{}{}},
-		[]string{"/data"},
+		[]string{"/data:/data"},
 		[]string{"name=value"},
 	})
 
@@ -165,7 +142,7 @@ func TestRunServer(t *testing.T) {
 
 // TestRemoveServer calls RemoveServer,
 // checking for no errors in return.
-func TestRemoveServerr(t *testing.T) {
+func TestRemoveServer(t *testing.T) {
 	ctx := context.Background()
 	// Constructs the client object.
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -179,7 +156,7 @@ func TestRemoveServerr(t *testing.T) {
 		"my-unique-id",
 		"nginx",
 		nat.PortSet{"8080/tcp": struct{}{}},
-		[]string{"/data"},
+		[]string{"/data:/data"},
 		[]string{"name=value"},
 	})
 	if err != nil {
