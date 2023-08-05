@@ -2,33 +2,29 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"ricochet/aurora/api"
 	"ricochet/aurora/docker"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 )
 
 func main() {
+	ctx := context.Background()
+
+	// // Constructs the client object.
+	// cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer cli.Close()
+
 	// Start the API.
 	api.RunApi()
 
-	ctx := context.Background()
-
-	// Constructs the client object.
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cli.Close()
-
 	// Create container environment variables.
-	env, _ := docker.NewContainerEnvVar("name", "value")
+	env, err := docker.NewContainerEnvVar("name", "value")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,26 +47,26 @@ func main() {
 	}
 
 	// Run an nginx container.
-	server, err := docker.RunServer(ctx, cli, config)
+	server, err := docker.RunServer(ctx, config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Gets containers that are actively running.
-	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{
-		Filters: filters.NewArgs(filters.Arg("id", server.ID)),
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
+	// // Gets containers that are actively running.
+	// containers, err := cli.ContainerList(ctx, types.ContainerListOptions{
+	// 	Filters: filters.NewArgs(filters.Arg("id", server.ID)),
+	// })
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	// Outputs top 10 running containers.
-	for _, container := range containers {
-		fmt.Printf("%s %s\n", container.ID[:10], container.Image)
-	}
+	// // Outputs top 10 running containers.
+	// for _, container := range containers {
+	// 	fmt.Printf("%s %s\n", container.ID[:10], container.Image)
+	// }
 
 	// Removes the container.
-	err = docker.RemoveServer(ctx, cli, server.ID)
+	err = docker.RemoveServer(ctx, server.ID)
 	if err != nil {
 		log.Fatal(err)
 	}

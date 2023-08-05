@@ -112,7 +112,7 @@ func TestRunServer(t *testing.T) {
 	defer cli.Close()
 
 	// Run a test container.
-	got, err := RunServer(ctx, cli, ContainerConfig{
+	got, err := RunServer(ctx, ContainerConfig{
 		"my-unique-id",
 		"nginx",
 		nat.PortSet{"8080/tcp": struct{}{}},
@@ -151,7 +151,7 @@ func TestRemoveServer(t *testing.T) {
 	defer cli.Close()
 
 	// Run a test container.
-	server, err := RunServer(ctx, cli, ContainerConfig{
+	server, err := RunServer(ctx, ContainerConfig{
 		"my-unique-id",
 		"nginx",
 		nat.PortSet{"8080/tcp": struct{}{}},
@@ -163,7 +163,7 @@ func TestRemoveServer(t *testing.T) {
 	}
 
 	// Stop the container.
-	if err := RemoveServer(ctx, cli, server.ID); err != nil {
+	if err := RemoveServer(ctx, server.ID); err != nil {
 		t.Fatalf("RemoveServer() returned an error: \n%v", err)
 	}
 

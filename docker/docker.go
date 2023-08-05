@@ -50,11 +50,18 @@ func NewContainerConfig(name, image string, ports nat.PortSet, binds []string, e
 }
 
 // RunServer creates a server container and starts it. Similar to `docker run`.
-func RunServer(ctx context.Context, cli *client.Client, config ContainerConfig) (container.CreateResponse, error) {
+func RunServer(ctx context.Context, config ContainerConfig) (container.CreateResponse, error) {
+	// Constructs the client object.
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return container.CreateResponse{}, err
+	}
+	defer cli.Close()
+
 	// Pull the image.
 	out, err := cli.ImagePull(ctx, config.Image, dockerTypes.ImagePullOptions{})
 	if err != nil {
-		panic(err)
+		return container.CreateResponse{}, err
 	}
 	defer out.Close()
 	// Output the download status.
@@ -83,7 +90,14 @@ func RunServer(ctx context.Context, cli *client.Client, config ContainerConfig) 
 }
 
 // RemoveServer stops and removes a server container.
-func RemoveServer(ctx context.Context, cli *client.Client, containerID string) error {
+func RemoveServer(ctx context.Context, containerID string) error {
+	// Constructs the client object.
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return err
+	}
+	defer cli.Close()
+
 	// Stop and delete the container and volumes.
 	if err := cli.ContainerRemove(ctx, containerID, dockerTypes.ContainerRemoveOptions{
 		RemoveVolumes: true,
@@ -94,8 +108,7 @@ func RemoveServer(ctx context.Context, cli *client.Client, containerID string) e
 	}
 
 	// Remove unused data.
-	_, err := cli.ContainersPrune(ctx, filters.Args{})
-	if err != nil {
+	if _, err := cli.ContainersPrune(ctx, filters.Args{}); err != nil {
 		return err
 	}
 
