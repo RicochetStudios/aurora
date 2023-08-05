@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+
+	"ricochet/aurora/api"
 	"ricochet/aurora/docker"
 
 	"github.com/docker/docker/api/types"
@@ -13,6 +15,9 @@ import (
 )
 
 func main() {
+	// Start the API.
+	api.RunApi()
+
 	ctx := context.Background()
 
 	// Constructs the client object.

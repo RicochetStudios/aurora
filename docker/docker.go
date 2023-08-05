@@ -7,7 +7,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/docker/docker/api/types"
+	dockerTypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
@@ -49,10 +49,10 @@ func NewContainerConfig(name, image string, ports nat.PortSet, binds []string, e
 	return containerConfig, nil
 }
 
-// Creates a server container and starts it. Similar to `docker run`.
+// RunServer creates a server container and starts it. Similar to `docker run`.
 func RunServer(ctx context.Context, cli *client.Client, config ContainerConfig) (container.CreateResponse, error) {
 	// Pull the image.
-	out, err := cli.ImagePull(ctx, config.Image, types.ImagePullOptions{})
+	out, err := cli.ImagePull(ctx, config.Image, dockerTypes.ImagePullOptions{})
 	if err != nil {
 		panic(err)
 	}
@@ -75,17 +75,17 @@ func RunServer(ctx context.Context, cli *client.Client, config ContainerConfig) 
 	}
 
 	// Start the container.
-	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+	if err := cli.ContainerStart(ctx, resp.ID, dockerTypes.ContainerStartOptions{}); err != nil {
 		return resp, err
 	}
 
 	return resp, nil
 }
 
-// Stops and removes a server container.
+// RemoveServer stops and removes a server container.
 func RemoveServer(ctx context.Context, cli *client.Client, containerID string) error {
 	// Stop and delete the container and volumes.
-	if err := cli.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{
+	if err := cli.ContainerRemove(ctx, containerID, dockerTypes.ContainerRemoveOptions{
 		RemoveVolumes: true,
 		RemoveLinks:   false,
 		Force:         true,
@@ -101,3 +101,17 @@ func RemoveServer(ctx context.Context, cli *client.Client, containerID string) e
 
 	return nil
 }
+
+// // GetServer gets details about the currently configured game server instance.
+// func GetServer(ctx context.Context, cli *client.Client, containerID string) (types.Server, error) {
+// 	// containers, err := cli.ContainerList(ctx, types.ContainerListOptions{
+// 	// 	Filters: filters.NewArgs(filters.Arg("id", containerID)),
+// 	// })
+// 	// if err != nil {
+// 	// 	return resp, err
+// 	// }
+
+// 	// for _, container := range containers {
+// 	// 	fmt.Printf("%s %s\n", container.ID[:10], container.Image)
+// 	// }
+// }

@@ -6,6 +6,7 @@ require (
 	github.com/docker/docker v24.0.5+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/google/go-cmp v0.5.9
+	ricochet/aurora/types v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -26,3 +27,5 @@ require (
 	golang.org/x/tools v0.6.0 // indirect
 	gotest.tools/v3 v3.5.0 // indirect
 )
+
+replace ricochet/aurora/types => ../types

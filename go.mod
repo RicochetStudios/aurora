@@ -2,11 +2,10 @@ module ricochet/aurora
 
 go 1.20
 
-replace ricochet/aurora/docker => ./docker
-
 require (
 	github.com/docker/docker v24.0.5+incompatible
 	github.com/docker/go-connections v0.4.0
+	ricochet/aurora/api v0.0.0-00010101000000-000000000000
 	ricochet/aurora/docker v0.0.0-00010101000000-000000000000
 )
 
@@ -38,3 +37,7 @@ require (
 	golang.org/x/tools v0.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace ricochet/aurora/api => ./api
+
+replace ricochet/aurora/docker => ./docker
