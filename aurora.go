@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"ricochet/aurora/docker"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -22,7 +23,7 @@ func main() {
 	defer cli.Close()
 
 	// Create container environment variables.
-	env, _ := NewContainerEnvVar("name", "value")
+	env, _ := docker.NewContainerEnvVar("name", "value")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,7 +34,7 @@ func main() {
 	}
 
 	// Create container config.
-	config, err := NewContainerConfig(
+	config, err := docker.NewContainerConfig(
 		"my-unique-id",
 		"nginx",
 		nat.PortSet{port: struct{}{}},
@@ -45,7 +46,7 @@ func main() {
 	}
 
 	// Run an nginx container.
-	server, err := RunServer(ctx, cli, config)
+	server, err := docker.RunServer(ctx, cli, config)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,7 +65,7 @@ func main() {
 	}
 
 	// Removes the container.
-	err = RemoveServer(ctx, cli, server.ID)
+	err = docker.RemoveServer(ctx, cli, server.ID)
 	if err != nil {
 		log.Fatal(err)
 	}

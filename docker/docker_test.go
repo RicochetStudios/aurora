@@ -1,4 +1,4 @@
-package main
+package docker
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
-
 	"github.com/google/go-cmp/cmp"
 )
 
