@@ -67,6 +67,7 @@ func NewServer() *types.Server {
 	return new(types.Server)
 }
 
+// test function to update data into firebase
 func UpdateServerFromFirebase() {
 
 	ctx := context.Background()
@@ -92,4 +93,25 @@ func UpdateServerFromFirebase() {
 	fmt.Println("Updated data: ", x)
 }
 
+// test function to get data from firebase
+func GetServerFromFirebase() interface{} {
 
+	ctx := context.Background()
+	
+	firestore, err := db.Firestore()
+
+	if err != nil {
+		log.Fatalln("error in initializing firebase app: ", err)
+	}
+
+	// Get the value from document 'test' in collection 'development'.
+	dsnap, err := firestore.Collection("development").Doc("test").Get(ctx)
+
+	if err != nil {
+		log.Fatalln("Failed to get data: ", err)
+	}
+
+	data := dsnap.Data()
+	
+	return data
+}
