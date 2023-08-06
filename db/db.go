@@ -20,7 +20,7 @@ func FireBase() (*firebase.App, error) {
 	}
 
 	// fetch service account key
-	opt := option.WithCredentialsFile("db/config/game-server-e2c56-firebase-adminsdk-thy9x-ab047e2cfa.json")
+	opt := option.WithCredentialsFile("config/firebase-config.json")
 
 
 	app, err := firebase.NewApp(ctx, conf, opt)
