@@ -1,7 +1,10 @@
 package services
 
 import (
+	"context"
+	"fmt"
 	"log"
+	"ricochet/aurora/db"
 	"ricochet/aurora/types"
 
 	"github.com/docker/go-connections/nat"
@@ -62,5 +65,31 @@ func UpdateServer(ctx *fiber.Ctx, server *types.Server) error {
 
 func NewServer() *types.Server {
 	return new(types.Server)
-
 }
+
+func UpdateServerFromFirebase() {
+
+	ctx := context.Background()
+	
+	firestore, err := db.Firestore()
+
+	if err != nil {
+		log.Fatalln("error in initializing firebase app: ", err)
+	}
+
+	data := map[string]interface{}{
+		"name": "Sam Woods",
+	}
+
+	// Set the value of 'NYC'.
+	x, err := firestore.Collection("development").Doc("test").Set(ctx, data)
+
+	if err != nil {
+		log.Fatalln("Failed to update data: ", err)
+	}
+	
+
+	fmt.Println("Updated data: ", x)
+}
+
+

@@ -24,6 +24,9 @@ func Start() {
 	// update server details
 	api.Put("/server", routes.UpdateServer)
 
+	// update date into firebase (TESTING)
+	api.Post("/server/firebase", routes.UpdateServerFromFirebase)
+
 	// Start the API.
 	log.Fatal(app.Listen(":6969"))
 }

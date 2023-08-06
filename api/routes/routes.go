@@ -41,3 +41,14 @@ func UpdateServer(c *fiber.Ctx) error {
 
 	return c.JSON(server)
 }
+
+// TESTING
+// METHOD: POST
+// ROUTE: /server/firebase
+// DESC: Update data into firebase
+func UpdateServerFromFirebase(c *fiber.Ctx) error {
+	services.UpdateServerFromFirebase()
+	return c.SendString("Updated server from firebase")
+}
+
+
