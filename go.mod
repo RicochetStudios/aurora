@@ -7,6 +7,7 @@ require (
 	github.com/docker/go-connections v0.4.0
 	ricochet/aurora/api v0.0.0-00010101000000-000000000000
 	ricochet/aurora/docker v0.0.0-00010101000000-000000000000
+	ricochet/aurora/db v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -41,3 +42,5 @@ require (
 replace ricochet/aurora/api => ./api
 
 replace ricochet/aurora/docker => ./docker
+
+replace ricochet/aurora/db => ./db
