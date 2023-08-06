@@ -5,23 +5,34 @@ import (
 	"log"
 
 	"ricochet/aurora/api"
+	"ricochet/aurora/db"
 	"ricochet/aurora/docker"
 
+	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 )
 
 func main() {
 	ctx := context.Background()
 
-	// // Constructs the client object.
-	// cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer cli.Close()
+	// Constructs the client object.
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cli.Close()
 
 	// Start the API.
 	api.RunApi()
+
+	// // connect to firebase
+	app, err := db.FireBase()	
+
+	// connect to firebase realtime database
+	client, err := db.RealtimeDatabase()
+
+	// connect to firebase firestore
+	firestore, err := db.Firestore()
 
 	// Create container environment variables.
 	env, err := docker.NewContainerEnvVar("name", "value")
