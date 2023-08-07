@@ -11,7 +11,7 @@ import (
 // METHOD: GET
 // ROUTE: /
 // DESC: Hit test to check if the server is running
-func HitTest(c *fiber.Ctx) error {	
+func HitTest(c *fiber.Ctx) error {
 	return c.SendString("Everything seems to be working, time is " + time.Now().Format("2006-01-02 15:04:05"))
 }
 
@@ -34,12 +34,25 @@ func UpdateServer(c *fiber.Ctx) error {
 		return err
 	}
 
-	err := services.UpdateServer(c, server)
+	server, err := services.UpdateServer(c, server)
 	if err != nil {
 		return err
 	}
 
 	return c.JSON(server)
+}
+
+// METHOD: DELETE
+// ROUTE: /server
+// DESC: Delete server
+func RemoveServer(c *fiber.Ctx) error {
+	if err := services.RemoveServer(c); err != nil {
+		return err
+	}
+
+	return c.JSON(struct {
+		Status string `json:"status"`
+	}{Status: "success"})
 }
 
 // TESTING
@@ -51,7 +64,6 @@ func UpdateServerFromFirebase(c *fiber.Ctx) error {
 	return c.SendString("Updated data into firebase")
 }
 
-
 // TESTING
 // METHOD: GET
 // ROUTE: /server/firebase
@@ -61,5 +73,3 @@ func GetServerFromFirebase(c *fiber.Ctx) error {
 
 	return c.JSON(response)
 }
-
-

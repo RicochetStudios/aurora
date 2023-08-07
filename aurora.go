@@ -1,20 +1,22 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
+	"os"
 	"ricochet/aurora/api"
-	"ricochet/aurora/docker"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
-	"github.com/docker/go-connections/nat"
 )
 
 func main() {
-	ctx := context.Background()
+	// ctx := context.Background()
+
+	path, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Print(path)
 
 	// Constructs the client object.
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -27,59 +29,11 @@ func main() {
 	api.Start()
 
 	// connect to firebase
-	// app, err := db.Firebase()	
+	// app, err := db.Firebase()
 
 	// connect to firebase realtime database
 	// client, err := db.RealtimeDatabase()
 
 	// connect to firebase firestore
 	// firestore, err := db.Firestore()
-
-	// Create container environment variables.
-	env, err := docker.NewContainerEnvVar("name", "value")
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Create container environment ports.
-	port, err := nat.NewPort("tcp", "8080")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create container config.
-	config, err := docker.NewContainerConfig(
-		"my-unique-id",
-		"nginx",
-		nat.PortSet{port: struct{}{}},
-		[]string{"/data:/data"},
-		[]string{env},
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Run an nginx container.
-	server, err := docker.RunServer(ctx, config)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Gets containers that are actively running.
-	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{
-		Filters: filters.NewArgs(filters.Arg("id", server.ID)),
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Outputs top 10 running containers.
-	for _, container := range containers {
-		fmt.Printf("%s %s\n", container.ID[:10], container.Image)
-	}
-
-	// Removes the container.
-	err = docker.RemoveServer(ctx, server.ID)
-	if err != nil {
-		log.Fatal(err)
-	}
 }

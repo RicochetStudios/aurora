@@ -2,21 +2,27 @@ package schema
 
 import (
 	"os"
+	"regexp"
 
 	"gopkg.in/yaml.v3"
 )
 
+type Sizes struct {
+	XS Size `yaml:"xs"`
+	S  Size `yaml:"s"`
+	M  Size `yaml:"m"`
+	L  Size `yaml:"l"`
+	XL Size `yaml:"xl"`
+}
+
+type Size struct {
+	Resources Resources `yaml:"resources"`
+	Players   int       `yaml:"players"`
+}
+
 type Resources struct {
 	CPU    string `yaml:"cpu"`
 	Memory string `yaml:"memory"`
-}
-
-type Sizes struct {
-	XS Resources `yaml:"xs"`
-	S  Resources `yaml:"s"`
-	M  Resources `yaml:"m"`
-	L  Resources `yaml:"l"`
-	XL Resources `yaml:"xl"`
 }
 
 type Network struct {
@@ -38,18 +44,18 @@ type Volume struct {
 }
 
 type Probes struct {
-	Command      []string `yaml:"command"`
-	StartupProbe struct {
-		FailureThreshold int `yaml:"failureThreshold"`
-		PeriodSeconds    int `yaml:"periodSeconds"`
-	} `yaml:"startupProbe"`
-	ReadyLiveProbe struct {
-		InitialDelaySeconds int `yaml:"initialDelaySeconds"`
-		PeriodSeconds       int `yaml:"periodSeconds"`
-		FailureThreshold    int `yaml:"failureThreshold"`
-		SuccessThreshold    int `yaml:"successThreshold"`
-		TimeoutSeconds      int `yaml:"timeoutSeconds"`
-	} `yaml:"readyLiveProbe"`
+	Command        []string `yaml:"command"`
+	StartupProbe   Probe    `yaml:"startupProbe"`
+	ReadynessProbe Probe    `yaml:"readynessProbe"`
+	LivenessProbe  Probe    `yaml:"livenessProbe"`
+}
+
+type Probe struct {
+	InitialDelaySeconds int `yaml:"initialDelaySeconds"`
+	PeriodSeconds       int `yaml:"periodSeconds"`
+	FailureThreshold    int `yaml:"failureThreshold"`
+	SuccessThreshold    int `yaml:"successThreshold"`
+	TimeoutSeconds      int `yaml:"timeoutSeconds"`
 }
 
 type Schema struct {
@@ -64,9 +70,24 @@ type Schema struct {
 	Probes   Probes    `yaml:"probes"`
 }
 
+// GetSchema gets a game schema from a yaml file and stores it as a Schema.
 func GetSchema(game string) (Schema, error) {
+	// We need to correct the directory path when testing.
+	var dir string = "/"
+	wd, err := os.Getwd()
+	if err != nil {
+		return Schema{}, err
+	}
+	matched, err := regexp.MatchString(`/schema$`, wd)
+	if err != nil {
+		return Schema{}, err
+	}
+	if !matched {
+		dir = "/schema/"
+	}
+
 	// Load the file; returns []byte.
-	f, err := os.ReadFile(game + "/schema.yaml")
+	f, err := os.ReadFile(wd + dir + game + "/schema.yaml")
 	if err != nil {
 		return Schema{}, err
 	}

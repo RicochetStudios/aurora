@@ -8,7 +8,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-
 func Start() {
 	app := fiber.New()
 	app.Use(cors.New())
@@ -21,8 +20,11 @@ func Start() {
 	// Get server details.
 	api.Post("/server", routes.GetServer)
 
-	// update server details
+	// Update server details
 	api.Put("/server", routes.UpdateServer)
+
+	// Update server details
+	api.Delete("/server", routes.RemoveServer)
 
 	// update date into firebase (TESTING)
 	api.Post("/server/firebase", routes.UpdateServerFromFirebase)
@@ -33,5 +35,3 @@ func Start() {
 	// Start the API.
 	log.Fatal(app.Listen(":6969"))
 }
-
-
