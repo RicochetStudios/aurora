@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"ricochet/aurora/db"
+	"ricochet/aurora/schema"
 	"ricochet/aurora/types"
 
-	"github.com/docker/go-connections/nat"
 	"github.com/gofiber/fiber/v2"
 
 	"ricochet/aurora/docker"
@@ -32,35 +32,33 @@ func GetServer() (types.Server, error) {
 }
 
 // UpdateServer creates or updates a server.
-func UpdateServer(ctx *fiber.Ctx, server *types.Server) error {
-	// Create container environment variables.
-	env, err := docker.NewContainerEnvVar("name", "value")
+func UpdateServer(ctx *fiber.Ctx, server *types.Server) (*types.Server, error) {
+	// Get the game schema.
+	schema, err := schema.GetSchema("minecraft_java")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Create container environment ports.
-	port, err := nat.NewPort("tcp", "8080")
+	// Create a container config.
+	config, err := docker.NewContainerConfigFromSchema("my-unique-id", schema)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Create container config.
-	config, err := docker.NewContainerConfig(
-		server.ID,
-		"nginx",
-		nat.PortSet{port: struct{}{}},
-		[]string{"/data:/data"},
-		[]string{env},
-	)
-	if err != nil {
+	// Deploy and start the container.
+	if _, err := docker.RunServer(ctx.Context(), config); err != nil {
 		log.Fatal(err)
 	}
 
-	container, err := docker.RunServer(ctx, config)
-	
+	return server, nil
+}
 
-	return err
+func RemoveServer(ctx *fiber.Ctx) error {
+	if err := docker.RemoveServer(ctx.Context()); err != nil {
+		log.Fatal(err)
+	}
+
+	return nil
 }
 
 func NewServer() *types.Server {
@@ -71,7 +69,7 @@ func NewServer() *types.Server {
 func UpdateServerFromFirebase() {
 
 	ctx := context.Background()
-	
+
 	firestore, err := db.Firestore()
 
 	if err != nil {
@@ -88,7 +86,6 @@ func UpdateServerFromFirebase() {
 	if err != nil {
 		log.Fatalln("Failed to update data: ", err)
 	}
-	
 
 	fmt.Println("Updated data: ", x)
 }
@@ -97,7 +94,7 @@ func UpdateServerFromFirebase() {
 func GetServerFromFirebase() interface{} {
 
 	ctx := context.Background()
-	
+
 	firestore, err := db.Firestore()
 
 	if err != nil {
@@ -112,6 +109,6 @@ func GetServerFromFirebase() interface{} {
 	}
 
 	data := dsnap.Data()
-	
+
 	return data
 }

@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"ricochet/aurora/schema"
 	"testing"
 
 	"github.com/docker/docker/api/types"
@@ -40,34 +41,6 @@ func TestNewContainerEnvVarInvalidName(t *testing.T) {
 	_, err := NewContainerEnvVar("$EULA!", "TRUE")
 	if err == nil {
 		t.Fatalf(`NewContainerEnvVar("$EULA!", "TRUE") expected a name invalid error while testing, got %T`, err)
-	}
-}
-
-// TestNewContainerConfig calls NewContainerConfig with correct inputs,
-// checking for a valid ContainerConfig in return.
-func TestNewContainerConfig(t *testing.T) {
-	var want ContainerConfig = ContainerConfig{
-		"my-unique-id",
-		"nginx",
-		nat.PortSet{"8080/tcp": struct{}{}},
-		[]string{"/data:/data"},
-		[]string{"name=value"},
-	}
-
-	got, err := NewContainerConfig(
-		"my-unique-id",
-		"nginx",
-		nat.PortSet{"8080/tcp": struct{}{}},
-		[]string{"/data:/data"},
-		[]string{"name=value"},
-	)
-
-	if err != nil {
-		t.Fatalf("NewContainerConfig() returned an error: \n%v", err)
-	}
-	// Use cmp for more complex types.
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Fatalf("NewContainerConfig() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -151,19 +124,18 @@ func TestRemoveServer(t *testing.T) {
 	defer cli.Close()
 
 	// Run a test container.
-	server, err := RunServer(ctx, ContainerConfig{
+	if _, err := RunServer(ctx, ContainerConfig{
 		"my-unique-id",
 		"nginx",
 		nat.PortSet{"8080/tcp": struct{}{}},
 		[]string{"/data:/data"},
 		[]string{"name=value"},
-	})
-	if err != nil {
+	}); err != nil {
 		t.Fatalf("RunServer() returned an error: \n%v", err)
 	}
 
 	// Stop the container.
-	if err := RemoveServer(ctx, server.ID); err != nil {
+	if err := RemoveServer(ctx); err != nil {
 		t.Fatalf("RemoveServer() returned an error: \n%v", err)
 	}
 
@@ -173,4 +145,99 @@ func TestRemoveServer(t *testing.T) {
 			t.Fatalf("TestRunServer() error cleaning up:\n%v", cleanupErr)
 		}
 	})
+}
+
+// TestNewContainerConfigFromSchema calls NewContainerConfigFromSchema with correct inputs,
+// checking for a valid ContainerConfig in return.
+func TestNewContainerConfigFromSchema(t *testing.T) {
+	// Create the schema.
+	var schema schema.Schema = schema.Schema{
+		Name:  "minecraft_java",
+		Image: "itzg/minecraft-server:latest",
+		URL:   "https://github.com/itzg/docker-minecraft-server",
+		Ratio: "1-2",
+		Sizes: schema.Sizes{
+			XS: schema.Size{
+				Resources: schema.Resources{CPU: "1000m", Memory: "2000Mi"},
+				Players:   8,
+			},
+			S: schema.Size{
+				Resources: schema.Resources{CPU: "1500m", Memory: "4000Mi"},
+				Players:   16,
+			},
+			M: schema.Size{
+				Resources: schema.Resources{CPU: "2000m", Memory: "8000Mi"},
+				Players:   32,
+			},
+			L: schema.Size{
+				Resources: schema.Resources{CPU: "3000m", Memory: "16000Mi"},
+				Players:   64,
+			},
+			XL: schema.Size{
+				Resources: schema.Resources{CPU: "4000m", Memory: "32000Mi"},
+				Players:   128,
+			},
+		},
+		Network: []schema.Network{
+			{Name: "game", Port: 25565, Protocol: "tcp"},
+		},
+		Settings: []schema.Setting{
+			{Name: "EULA", Value: "TRUE"},
+			{Name: "TYPE", Value: "{{ .Values.game.modLoader }}"},
+			{Name: "MAX_PLAYERS", Value: "{{ .size.players }}"},
+			{Name: "MOTD", Value: "{{ .Values.name }}"},
+		},
+		Volumes: []schema.Volume{
+			{
+				Name:  "data",
+				Path:  "/data",
+				Class: "classic",
+				Size:  "10Gi",
+			},
+		},
+		Probes: schema.Probes{
+			Command: []string{"mc-health"},
+			StartupProbe: schema.Probe{
+				FailureThreshold: 30,
+				PeriodSeconds:    10,
+			},
+			ReadynessProbe: schema.Probe{
+				InitialDelaySeconds: 30,
+				PeriodSeconds:       5,
+				FailureThreshold:    20,
+				SuccessThreshold:    3,
+				TimeoutSeconds:      1,
+			},
+			LivenessProbe: schema.Probe{
+				InitialDelaySeconds: 30,
+				PeriodSeconds:       5,
+				FailureThreshold:    20,
+				SuccessThreshold:    3,
+				TimeoutSeconds:      1,
+			},
+		},
+	}
+
+	var want ContainerConfig = ContainerConfig{
+		"my-unique-id",
+		"itzg/minecraft-server:latest",
+		nat.PortSet{"25565/tcp": struct{}{}},
+		[]string{"/data:/data"},
+		[]string{
+			"EULA=TRUE",
+			"TYPE={{ .Values.game.modLoader }}",
+			"MAX_PLAYERS={{ .size.players }}",
+			"MOTD={{ .Values.name }}",
+		},
+	}
+
+	got, err := NewContainerConfigFromSchema("my-unique-id", schema)
+
+	if err != nil {
+		t.Fatalf("NewContainerConfigFromSchema() returned an error: \n%v", err)
+	}
+	// Use cmp for more complex types.
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Fatalf("NewContainerConfigFromSchema() mismatch (-want +got):\n%s", diff)
+	}
 }

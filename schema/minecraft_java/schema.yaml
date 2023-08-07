@@ -31,7 +31,7 @@ sizes:
 network:
   - name: game
     port: 25565
-    protocol: TCP
+    protocol: tcp
 settings:
   - name: EULA
     value: "TRUE"
@@ -52,9 +52,15 @@ probes:
   startupProbe:
     failureThreshold: 30
     periodSeconds: 10
-  readyLiveProbe:
+  readynessProbe:
     initialDelaySeconds: 30
     periodSeconds: 5
     failureThreshold: 20
-    successThreshold: 1
+    successThreshold: 3
+    timeoutSeconds: 1
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 20
+    successThreshold: 3
     timeoutSeconds: 1

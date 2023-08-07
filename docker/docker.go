@@ -3,9 +3,11 @@ package docker
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"regexp"
+	"ricochet/aurora/schema"
 
 	dockerTypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -36,17 +38,48 @@ type ContainerConfig struct {
 	Env          []string
 }
 
-// NewContainerConfig creates a new ContainerConfig.
-func NewContainerConfig(name, image string, ports nat.PortSet, binds []string, env []string) (ContainerConfig, error) {
-	containerConfig := ContainerConfig{
-		Name:         name,
-		Image:        image,
-		ExposedPorts: ports,
-		Binds:        binds,
-		Env:          env,
+// NewContainerConfigFromSchema creates a new ContainerConfig from a game schema and a name.
+func NewContainerConfigFromSchema(name string, schema schema.Schema) (ContainerConfig, error) {
+	// Create container environment ports.
+	var portSet nat.PortSet = nat.PortSet{}
+	for _, network := range schema.Network {
+		port, err := nat.NewPort(
+			network.Protocol,
+			fmt.Sprint(network.Port),
+		)
+		if err != nil {
+			return ContainerConfig{}, err
+		}
+		portSet[port] = struct{}{}
 	}
 
-	return containerConfig, nil
+	// Create container bindings.
+	var bindList []string = []string{}
+	for _, volume := range schema.Volumes {
+		bindList = append(bindList, (volume.Path + ":" + volume.Path))
+	}
+
+	// Create container environment variables.
+	var envList []string = []string{}
+	for _, setting := range schema.Settings {
+		env, err := NewContainerEnvVar(
+			setting.Name,
+			setting.Value,
+		)
+		if err != nil {
+			return ContainerConfig{}, err
+		}
+		envList = append(envList, env)
+	}
+
+	// Create container config.
+	return ContainerConfig{
+		Name:         name,
+		Image:        schema.Image,
+		ExposedPorts: portSet,
+		Binds:        bindList,
+		Env:          envList,
+	}, nil
 }
 
 // RunServer creates a server container and starts it. Similar to `docker run`.
@@ -90,7 +123,7 @@ func RunServer(ctx context.Context, config ContainerConfig) (container.CreateRes
 }
 
 // RemoveServer stops and removes a server container.
-func RemoveServer(ctx context.Context, containerID string) error {
+func RemoveServer(ctx context.Context) error {
 	// Constructs the client object.
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -98,13 +131,24 @@ func RemoveServer(ctx context.Context, containerID string) error {
 	}
 	defer cli.Close()
 
-	// Stop and delete the container and volumes.
-	if err := cli.ContainerRemove(ctx, containerID, dockerTypes.ContainerRemoveOptions{
-		RemoveVolumes: true,
-		RemoveLinks:   false,
-		Force:         true,
-	}); err != nil {
+	// Get the latest container (the only one).
+	containers, err := cli.ContainerList(ctx, dockerTypes.ContainerListOptions{
+		Latest: true,
+		All:    true,
+	})
+	if err != nil {
 		return err
+	}
+
+	// Stop and delete the container and volumes.
+	for _, cont := range containers {
+		if err := cli.ContainerRemove(ctx, cont.ID, dockerTypes.ContainerRemoveOptions{
+			RemoveVolumes: true,
+			RemoveLinks:   false,
+			Force:         true,
+		}); err != nil {
+			return err
+		}
 	}
 
 	// Remove unused data.
