@@ -29,7 +29,7 @@ func main() {
 	api.Start()
 
 	// connect to firebase
-	// app, err := db.FireBase()
+	// app, err := db.Firebase()
 
 	// connect to firebase realtime database
 	// client, err := db.RealtimeDatabase()

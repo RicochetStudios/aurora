@@ -11,7 +11,7 @@ import (
 )
 
 // Call this function to get/initialise the firebase app
-func FireBase() (*firebase.App, error) {
+func Firebase() (*firebase.App, error) {
 	ctx := context.Background()
 
 	// configure database URL
@@ -35,7 +35,7 @@ func FireBase() (*firebase.App, error) {
 func RealtimeDatabase() (*db.Client, error) {
 	ctx := context.Background()
 
-	app, err := FireBase();
+	app, err := Firebase();
 
 	if err != nil {
 		log.Fatalln("error in initializing firebase app: ", err)
@@ -54,7 +54,7 @@ func RealtimeDatabase() (*db.Client, error) {
 func Firestore() (*firestore.Client, error) {
 	ctx := context.Background()
 
-	app, err := FireBase();
+	app, err := Firebase();
 
 	if err != nil {
 		log.Fatalln("error in initializing firebase app: ", err)
