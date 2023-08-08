@@ -1,7 +1,7 @@
 package api_test
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -33,11 +33,9 @@ func Test_HitTest(t *testing.T) {
 	utils.AssertEqual(t, 200, resp.StatusCode, "Status code")
 
 	if resp.StatusCode == fiber.StatusOK {
-	body, _ := ioutil.ReadAll(resp.Body)
-	// Test 2 if body return current time (API is working)
-	utils.AssertEqual(t, "Everything seems to be working, time is " + time.Now().Format("2006-01-02 15:04:05"), string(body), "Body")
+		body, _ := io.ReadAll(resp.Body)
+		// Test 2 if body return current time (API is working)
+		utils.AssertEqual(t, "Everything seems to be working, time is "+time.Now().Format("2006-01-02 15:04:05"), string(body), "Body")
 
 	}
 }
-
-
