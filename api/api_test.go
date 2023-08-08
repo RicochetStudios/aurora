@@ -1,8 +1,10 @@
 package api_test
 
 import (
+	"io/ioutil"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"ricochet/aurora/api/routes"
 
@@ -17,14 +19,25 @@ func Test_HitTest(t *testing.T) {
 	app := fiber.New()
 	app.Use(cors.New())
 
-	api := app.Group("/api")
+	// set routes
+	app.Get("/", routes.HitTest)
 
-	api.Get("/", routes.HitTest)
+	// set request
+	req := httptest.NewRequest("GET", "/", nil)
+	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := app.Test(httptest.NewRequest("GET", "/", nil))
+	// call api
+	resp, _ := app.Test(req)
 
-	utils.AssertEqual(t, nil, err, "app.Test")
-	utils.AssertEqual(t, 404, resp.StatusCode, "Status code")
+	// Test 1 : if status code is 200 (API is working)
+	utils.AssertEqual(t, 200, resp.StatusCode, "Status code")
+
+	if resp.StatusCode == fiber.StatusOK {
+	body, _ := ioutil.ReadAll(resp.Body)
+	// Test 2 if body return current time (API is working)
+	utils.AssertEqual(t, "Everything seems to be working, time is " + time.Now().Format("2006-01-02 15:04:05"), string(body), "Body")
+
+	}
 }
 
 
