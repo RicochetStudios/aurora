@@ -49,7 +49,7 @@ func cleaupAllContainers(ctx context.Context, cli *client.Client) error {
 	// Get all containers.
 	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
 	if err != nil {
-		return err
+		return fmt.Errorf("cleaupAllContainers() error getting list of containers: %v", err)
 	}
 
 	// Stop and remove containers and volumes.
@@ -60,14 +60,14 @@ func cleaupAllContainers(ctx context.Context, cli *client.Client) error {
 			RemoveLinks:   false,
 			Force:         true,
 		}); err != nil {
-			return err
+			return fmt.Errorf("cleaupAllContainers() error removing container with id: %v:\n%v", instance.ID, err)
 		}
 		fmt.Println("Success")
 	}
 
 	// Remove unused data.
 	if _, err := cli.ContainersPrune(ctx, filters.Args{}); err != nil {
-		return err
+		return fmt.Errorf("cleaupAllContainers() error pruning containers: %v", err)
 	}
 
 	return nil
@@ -83,6 +83,13 @@ func TestRunServer(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cli.Close()
+
+	// Cleanup any remaining containers, volumes and data at the end of the test.
+	t.Cleanup(func() {
+		if cleanupErr := cleaupAllContainers(ctx, cli); cleanupErr != nil {
+			t.Fatalf("TestRunServer() error cleaning up:\n%v", cleanupErr)
+		}
+	})
 
 	// Run a test container.
 	got, err := RunServer(ctx, ContainerConfig{
@@ -103,13 +110,6 @@ func TestRunServer(t *testing.T) {
 	if len(got.Warnings) > 0 {
 		t.Fatalf(`RunServer() returned warnings in the response.`)
 	}
-
-	// Cleanup any remaining containers, volumes and data.
-	t.Cleanup(func() {
-		if cleanupErr := cleaupAllContainers(ctx, cli); cleanupErr != nil {
-			t.Fatalf("TestRunServer() error cleaning up:\n%v", cleanupErr)
-		}
-	})
 }
 
 // TestRemoveServer calls RemoveServer,
@@ -122,6 +122,13 @@ func TestRemoveServer(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cli.Close()
+
+	// Cleanup any remaining containers, volumes and data at the end of the test.
+	t.Cleanup(func() {
+		if cleanupErr := cleaupAllContainers(ctx, cli); cleanupErr != nil {
+			t.Fatalf("TestRunServer() error cleaning up:\n%v", cleanupErr)
+		}
+	})
 
 	// Run a test container.
 	if _, err := RunServer(ctx, ContainerConfig{
@@ -138,13 +145,6 @@ func TestRemoveServer(t *testing.T) {
 	if err := RemoveServer(ctx); err != nil {
 		t.Fatalf("RemoveServer() returned an error: \n%v", err)
 	}
-
-	// Cleanup any remaining containers, volumes and data.
-	t.Cleanup(func() {
-		if cleanupErr := cleaupAllContainers(ctx, cli); cleanupErr != nil {
-			t.Fatalf("TestRunServer() error cleaning up:\n%v", cleanupErr)
-		}
-	})
 }
 
 // TestNewContainerConfigFromSchema calls NewContainerConfigFromSchema with correct inputs,
