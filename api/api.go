@@ -20,16 +20,16 @@ func Start() {
 	// Get server details.
 	api.Post("/server", routes.GetServer)
 
-	// Update server details
+	// Update server details.
 	api.Put("/server", routes.UpdateServer)
 
-	// Update server details
+	// Remove server.
 	api.Delete("/server", routes.RemoveServer)
 
-	// update date into firebase (TESTING)
+	// Update date into firebase (TESTING)
 	api.Post("/server/firebase", routes.UpdateServerFromFirebase)
 
-	// get data from firebase (TESTING)
+	// Get data from firebase (TESTING)
 	api.Get("/server/firebase", routes.GetServerFromFirebase)
 
 	// Start the API.
