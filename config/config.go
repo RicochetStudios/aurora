@@ -11,7 +11,7 @@ import (
 )
 
 // configPath is the path to the config file.
-var configPath string = "/config.json"
+var configPath string = "/aurora-config.json"
 
 // Config is a struct of the local, persistent configuration of this instance.
 type Config struct {
@@ -36,7 +36,8 @@ func Update(newConfig Config) (Config, error) {
 	}
 
 	// Merge the configs, taking precidence from the input config.
-	if err := mergo.Merge(&config, newConfig, mergo.WithOverride); err != nil {
+	// WithOverwriteWithEmptyValue allows us to overwrite populated fields even with empty fields.
+	if err := mergo.Merge(&config, newConfig, mergo.WithOverwriteWithEmptyValue); err != nil {
 		return Config{}, fmt.Errorf("Update() error merging configs: %v", err)
 	}
 

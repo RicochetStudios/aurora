@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"ricochet/aurora/config"
 	"ricochet/aurora/db"
 	"ricochet/aurora/schema"
 	"ricochet/aurora/types"
@@ -14,56 +15,72 @@ import (
 )
 
 // GetServer gets details about the currently configured game server instance.
-func GetServer() (types.Server, error) {
-	// Temporarily create mock server response.
-	mockServer := types.Server{
-		ID:   "00000001",
-		Size: "xs",
-		Game: types.Game{
-			Name:      "minecraft_java",
-			Modloader: "vanilla",
-		},
-		Network: types.Network{
-			Type: "private",
-		},
+func GetServer() types.Server {
+	// Read the config file.
+	config, err := config.Read()
+	if err != nil {
+		log.Fatalf("Error reading config: \n%v", err)
 	}
+	var server types.Server = config.Server
 
-	return mockServer, nil
+	return server
 }
 
 // UpdateServer creates or updates a server.
-func UpdateServer(ctx *fiber.Ctx, server *types.Server) (*types.Server, error) {
+func UpdateServer(ctx *fiber.Ctx, server types.Server) types.Server {
 	// Get the game schema.
 	schema, err := schema.GetSchema("minecraft_java")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error reading schema: \n%v", err)
 	}
 
 	// Create a container config.
-	config, err := docker.NewContainerConfigFromSchema("my-unique-id", schema)
+	containerConfig, err := docker.NewContainerConfigFromSchema("my-unique-id", schema)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error creating container config: \n%v", err)
 	}
 
 	// Deploy and start the container.
-	if _, err := docker.RunServer(ctx.Context(), config); err != nil {
-		log.Fatal(err)
+	if _, err := docker.RunServer(ctx.Context(), containerConfig); err != nil {
+		log.Fatalf("Error deploying container: \n%v", err)
 	}
 
-	return server, nil
+	// Update the local config.
+	config, err := config.Update(config.Config{Server: server})
+	if err != nil {
+		log.Fatalf("Error updating local config: \n%v", err)
+	}
+	server = config.Server
+
+	return server
 }
 
-func RemoveServer(ctx *fiber.Ctx) error {
+func RemoveServer(ctx *fiber.Ctx) {
+	// Remove the container.
 	if err := docker.RemoveServer(ctx.Context()); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error removing container: \n%v", err)
 	}
 
-	return nil
+	// Remove the server details from the local config.
+	_, err := config.Update(config.Config{Server: types.Server{
+		ID:   "",
+		Size: "",
+		Game: types.Game{
+			Name:      "",
+			Modloader: "",
+		},
+		Network: types.Network{
+			Type: "",
+		},
+	}})
+	if err != nil {
+		log.Fatalf("Error updating local config: \n%v", err)
+	}
 }
 
-func NewServer() *types.Server {
-	return new(types.Server)
-}
+// func NewServer() types.Server {
+// 	return new(types.Server)
+// }
 
 // test function to update data into firebase
 func UpdateServerFromFirebase() {

@@ -104,7 +104,7 @@ func TestUpdate(t *testing.T) {
 			Size: "xl",
 			Game: types.Game{
 				Name:      "valheim",
-				Modloader: "vanilla",
+				Modloader: "",
 			},
 			Network: types.Network{
 				Type: "public",
@@ -120,7 +120,7 @@ func TestUpdate(t *testing.T) {
 			Size: "xl",
 			Game: types.Game{
 				Name:      "valheim",
-				Modloader: "vanilla",
+				Modloader: "",
 			},
 			Network: types.Network{
 				Type: "public",

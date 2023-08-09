@@ -22,3 +22,6 @@ go.work*
 
 # Firebase config file
 config/firebase-config.json
+
+# Local aurora config file.
+aurora-config.json

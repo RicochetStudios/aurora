@@ -1,0 +1,11 @@
+{
+	"id": "00000001",
+	"size": "xs",
+	"game": {
+		"name": "minecraft_java",
+		"modloader": "vanilla"
+	},
+	"network": {
+		"type": "private"
+	}
+}
