@@ -11,9 +11,7 @@ import (
 )
 
 // Call this function to get/initialise the firebase app
-func Firebase() (*firebase.App, error) {
-	ctx := context.Background()
-
+func Firebase(ctx context.Context) (*firebase.App, error) {
 	// configure database URL
 	conf := &firebase.Config{
 		DatabaseURL: "https://game-server-e2c56-default-rtdb.europe-west1.firebasedatabase.app",
@@ -21,7 +19,6 @@ func Firebase() (*firebase.App, error) {
 
 	// fetch service account key
 	opt := option.WithCredentialsFile("config/firebase-config.json")
-
 
 	app, err := firebase.NewApp(ctx, conf, opt)
 	if err != nil {
@@ -32,10 +29,8 @@ func Firebase() (*firebase.App, error) {
 }
 
 // Call this function to get a client for the realtime database
-func RealtimeDatabase() (*db.Client, error) {
-	ctx := context.Background()
-
-	app, err := Firebase();
+func RealtimeDatabase(ctx context.Context) (*db.Client, error) {
+	app, err := Firebase(ctx)
 
 	if err != nil {
 		log.Fatalln("error in initializing firebase app: ", err)
@@ -49,12 +44,9 @@ func RealtimeDatabase() (*db.Client, error) {
 	return client, err
 }
 
-
 // Call this function to get a client for the firestore database
-func Firestore() (*firestore.Client, error) {
-	ctx := context.Background()
-
-	app, err := Firebase();
+func Firestore(ctx context.Context) (*firestore.Client, error) {
+	app, err := Firebase(ctx)
 
 	if err != nil {
 		log.Fatalln("error in initializing firebase app: ", err)
@@ -67,4 +59,3 @@ func Firestore() (*firestore.Client, error) {
 
 	return client, err
 }
-	
