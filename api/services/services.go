@@ -6,27 +6,37 @@ import (
 	"log"
 	"ricochet/aurora/config"
 	"ricochet/aurora/db"
+	"ricochet/aurora/docker"
 	"ricochet/aurora/schema"
 	"ricochet/aurora/types"
 
 	"github.com/gofiber/fiber/v2"
-
-	"ricochet/aurora/docker"
 )
 
 // Setup performs initialisation steps to prepare the app to take following instructions.
-func Setup() config.Config {
-	return config.Config{}
+func Setup(newConfig config.Config) config.Config {
+	// Add or update the instance ID and cluster ID in the config.
+	currentConfig, err := config.Update(newConfig)
+	if err != nil {
+		log.Fatalf("Error updating local config: \n%v", err)
+	}
+
+	return currentConfig
 }
 
 // GetServer gets details about the currently configured game server instance.
-func GetServer() types.Server {
+func GetServer(ctx *fiber.Ctx) types.Server {
 	// Read the config file.
 	config, err := config.Read()
 	if err != nil {
 		log.Fatalf("Error reading config: \n%v", err)
 	}
-	var server types.Server = config.Server
+
+	// Read the current server configuration.
+	server, err := db.GetServer(ctx.Context(), config.ID)
+	if err != nil {
+		log.Fatalf("Error reading server details from the database: \n%v", err)
+	}
 
 	return server
 }
@@ -50,12 +60,20 @@ func UpdateServer(ctx *fiber.Ctx, server types.Server) types.Server {
 		log.Fatalf("Error deploying container: \n%v", err)
 	}
 
-	// Update the local config.
-	config, err := config.Update(config.Config{Server: server})
+	// Read the config file.
+	id, err := config.GetId()
 	if err != nil {
-		log.Fatalf("Error updating local config: \n%v", err)
+		log.Fatalf("Error getting config id: \n%v", err)
 	}
-	server = config.Server
+
+	// Add the status.
+	server.Status = "running"
+
+	// Create or update the current server configuration.
+	server, err = db.SetServer(ctx.Context(), id, server)
+	if err != nil {
+		log.Fatalf("Error updating server details in the database: \n%v", err)
+	}
 
 	return server
 }
@@ -66,26 +84,18 @@ func RemoveServer(ctx *fiber.Ctx) {
 		log.Fatalf("Error removing container: \n%v", err)
 	}
 
-	// Remove the server details from the local config.
-	_, err := config.Update(config.Config{Server: types.Server{
-		ID:   "",
-		Size: "",
-		Game: types.Game{
-			Name:      "",
-			Modloader: "",
-		},
-		Network: types.Network{
-			Type: "",
-		},
-	}})
+	// Read the config file.
+	id, err := config.GetId()
 	if err != nil {
-		log.Fatalf("Error updating local config: \n%v", err)
+		log.Fatalf("Error getting config id: \n%v", err)
+	}
+
+	// Delete the current server configuration.
+	_, err = db.SetServer(ctx.Context(), id, types.Server{Status: "deallocated"})
+	if err != nil {
+		log.Fatalf("Error updating server details in the database: \n%v", err)
 	}
 }
-
-// func NewServer() types.Server {
-// 	return new(types.Server)
-// }
 
 // test function to update data into firebase
 func UpdateServerFromFirebase() {

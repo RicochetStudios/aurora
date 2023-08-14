@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"ricochet/aurora/types"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -53,33 +52,13 @@ func TestUpdate(t *testing.T) {
 
 	// Test creation.
 	var createWant Config = Config{
+		ID:        "00000001",
 		ClusterID: "myclusterid",
-		Server: types.Server{
-			ID:   "00000001",
-			Size: "xs",
-			Game: types.Game{
-				Name:      "minecraft_java",
-				Modloader: "fabric",
-			},
-			Network: types.Network{
-				Type: "private",
-			},
-		},
 	}
 
 	createGot, createErr := Update(Config{
+		ID:        "00000001",
 		ClusterID: "myclusterid",
-		Server: types.Server{
-			ID:   "00000001",
-			Size: "xs",
-			Game: types.Game{
-				Name:      "minecraft_java",
-				Modloader: "fabric",
-			},
-			Network: types.Network{
-				Type: "private",
-			},
-		},
 	})
 
 	if createErr != nil {
@@ -99,33 +78,11 @@ func TestUpdate(t *testing.T) {
 	var modifyWant Config = Config{
 		ID:        "00000002",
 		ClusterID: "mynewclusterid",
-		Server: types.Server{
-			ID:   "00000002",
-			Size: "xl",
-			Game: types.Game{
-				Name:      "valheim",
-				Modloader: "",
-			},
-			Network: types.Network{
-				Type: "public",
-			},
-		},
 	}
 
 	modifyGot, modifyErr := Update(Config{
 		ID:        "00000002",
 		ClusterID: "mynewclusterid",
-		Server: types.Server{
-			ID:   "00000002",
-			Size: "xl",
-			Game: types.Game{
-				Name:      "valheim",
-				Modloader: "",
-			},
-			Network: types.Network{
-				Type: "public",
-			},
-		},
 	})
 
 	if modifyErr != nil {
@@ -139,6 +96,33 @@ func TestUpdate(t *testing.T) {
 	// Check if the file exists.
 	if _, pathErr := os.Stat(wd + configPath); errors.Is(pathErr, os.ErrNotExist) {
 		t.Fatalf("TestUpdateCreate() (modify) file was not created: \n%v", pathErr)
+	}
+}
+
+func TestGetId(t *testing.T) {
+	// Cleanup at the end of the test.
+	t.Cleanup(func() {
+		if err := cleanup(); err != nil {
+			t.Fatalf("TestUpdate() (create) error cleaning up:\n%v", err)
+		}
+	})
+
+	var want string = "00000001"
+
+	// Setup the config file.
+	if _, err := Update(Config{
+		ID: "00000001",
+	}); err != nil {
+		t.Fatalf("TestGetId() error setting up the config: \n%v", err)
+	}
+
+	got, err := GetId()
+
+	if err != nil {
+		t.Fatalf("TestGetId() error getting the id from the config: \n%v", err)
+	}
+	if got != want {
+		t.Fatalf("TestGetId() = %q, %v, want match for %#q, nil", got, err, want)
 	}
 }
 

@@ -8,22 +8,14 @@ type Game struct {
 
 // Network is configuration of the networking for the instance.
 type Network struct {
-	Type string `json:"type" yaml:"type" xml:"type" form:"type"`
+	Type    string `json:"type" yaml:"type" xml:"type" form:"type"`
+	Address string `json:"address" yaml:"address" xml:"address" form:"address"`
 }
 
 // Server is a set of useful details about a game server instance.
 type Server struct {
-	ID      string  `json:"id" yaml:"id" xml:"id" form:"id"`
 	Size    string  `json:"size" yaml:"size" xml:"size" form:"size"`
 	Game    Game    `json:"game" yaml:"game" xml:"game" form:"game"`
 	Network Network `json:"network" yaml:"network" xml:"network" form:"network"`
+	Status  string  `json:"status" yaml:"status" xml:"status" form:"status"`
 }
-
-// // Server is a set of useful details about a game server instance.
-// type Server struct {
-// 	// ID: string // The tenant unique identifier of the game server instance.
-// 	// Name: string // The tenant unique name of the game server instance.
-// 	// TenantID string // The tenant this server instance belongs to.
-
-// 	Container:
-// }

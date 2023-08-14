@@ -18,8 +18,8 @@ func HitTest(c *fiber.Ctx) error {
 	return c.SendString("Everything seems to be working, time is " + time.Now().Format("2006-01-02 15:04:05"))
 }
 
-// METHOD: GET
-// ROUTE: /
+// METHOD: POST
+// ROUTE: /setup
 // DESC: Performs initialisation steps to prepare the app to take following instructions.
 func Setup(c *fiber.Ctx) error {
 	var config config.Config
@@ -29,7 +29,7 @@ func Setup(c *fiber.Ctx) error {
 		log.Fatalf("Error in provided body: \n%v", err)
 	}
 
-	config = services.Setup()
+	config = services.Setup(config)
 
 	return c.JSON(config)
 }
@@ -38,7 +38,7 @@ func Setup(c *fiber.Ctx) error {
 // ROUTE: /server
 // DESC: Get server details
 func GetServer(c *fiber.Ctx) error {
-	server := services.GetServer()
+	server := services.GetServer(c)
 	return c.JSON(server)
 }
 
