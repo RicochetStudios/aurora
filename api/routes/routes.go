@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"ricochet/aurora/api/services"
+	"ricochet/aurora/config"
 	"ricochet/aurora/types"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,6 +16,22 @@ import (
 // DESC: Hit test to check if the server is running
 func HitTest(c *fiber.Ctx) error {
 	return c.SendString("Everything seems to be working, time is " + time.Now().Format("2006-01-02 15:04:05"))
+}
+
+// METHOD: GET
+// ROUTE: /
+// DESC: Performs initialisation steps to prepare the app to take following instructions.
+func Setup(c *fiber.Ctx) error {
+	var config config.Config
+
+	// Check for errors in body.
+	if err := c.BodyParser(&config); err != nil {
+		log.Fatalf("Error in provided body: \n%v", err)
+	}
+
+	config = services.Setup()
+
+	return c.JSON(config)
 }
 
 // METHOD: POST
@@ -29,7 +46,6 @@ func GetServer(c *fiber.Ctx) error {
 // ROUTE: /server
 // DESC: Update server details
 func UpdateServer(c *fiber.Ctx) error {
-	// server := new(types.Server)
 	var server types.Server
 
 	// Check for errors in body.

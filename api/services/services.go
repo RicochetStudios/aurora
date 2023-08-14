@@ -14,6 +14,11 @@ import (
 	"ricochet/aurora/docker"
 )
 
+// Setup performs initialisation steps to prepare the app to take following instructions.
+func Setup() config.Config {
+	return config.Config{}
+}
+
 // GetServer gets details about the currently configured game server instance.
 func GetServer() types.Server {
 	// Read the config file.
