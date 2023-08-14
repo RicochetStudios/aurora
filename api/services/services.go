@@ -1,7 +1,6 @@
 package services
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"ricochet/aurora/config"
@@ -55,6 +54,7 @@ func UpdateServer(ctx *fiber.Ctx, server types.Server) types.Server {
 	return server
 }
 
+// RemoveServer stops and deletes a server.
 func RemoveServer(ctx *fiber.Ctx) {
 	// Remove the container.
 	if err := docker.RemoveServer(ctx.Context()); err != nil {
@@ -78,16 +78,9 @@ func RemoveServer(ctx *fiber.Ctx) {
 	}
 }
 
-// func NewServer() types.Server {
-// 	return new(types.Server)
-// }
-
 // test function to update data into firebase
-func UpdateServerFromFirebase() {
-
-	ctx := context.Background()
-
-	firestore, err := db.Firestore()
+func UpdateServerFromFirebase(ctx *fiber.Ctx) {
+	firestore, err := db.Firestore(ctx.Context())
 
 	if err != nil {
 		log.Fatalln("error in initializing firebase app: ", err)
@@ -98,7 +91,7 @@ func UpdateServerFromFirebase() {
 	}
 
 	// Set the value of 'NYC'.
-	x, err := firestore.Collection("development").Doc("test").Set(ctx, data)
+	x, err := firestore.Collection("development").Doc("test").Set(ctx.Context(), data)
 
 	if err != nil {
 		log.Fatalln("Failed to update data: ", err)
@@ -108,18 +101,15 @@ func UpdateServerFromFirebase() {
 }
 
 // test function to get data from firebase
-func GetServerFromFirebase() interface{} {
-
-	ctx := context.Background()
-
-	firestore, err := db.Firestore()
+func GetServerFromFirebase(ctx *fiber.Ctx) interface{} {
+	firestore, err := db.Firestore(ctx.Context())
 
 	if err != nil {
 		log.Fatalln("error in initializing firebase app: ", err)
 	}
 
 	// Get the value from document 'test' in collection 'development'.
-	dsnap, err := firestore.Collection("development").Doc("test").Get(ctx)
+	dsnap, err := firestore.Collection("development").Doc("test").Get(ctx.Context())
 
 	if err != nil {
 		log.Fatalln("Failed to get data: ", err)
