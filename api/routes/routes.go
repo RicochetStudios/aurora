@@ -75,7 +75,7 @@ func RemoveServer(c *fiber.Ctx) error {
 // ROUTE: /server/firebase
 // DESC: Update data into firebase
 func UpdateServerFromFirebase(c *fiber.Ctx) error {
-	services.UpdateServerFromFirebase()
+	services.UpdateServerFromFirebase(c)
 	return c.SendString("Updated data into firebase")
 }
 
@@ -84,7 +84,7 @@ func UpdateServerFromFirebase(c *fiber.Ctx) error {
 // ROUTE: /server/firebase
 // DESC: Get data from firebase
 func GetServerFromFirebase(c *fiber.Ctx) error {
-	response := services.GetServerFromFirebase()
+	response := services.GetServerFromFirebase(c)
 
 	return c.JSON(response)
 }

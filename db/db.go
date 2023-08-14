@@ -24,9 +24,7 @@ const (
 )
 
 // Call this function to get/initialise the firebase app
-func Firebase() (*firebase.App, error) {
-	ctx := context.Background()
-
+func Firebase(ctx context.Context) (*firebase.App, error) {
 	// configure database URL
 	conf := &firebase.Config{
 		DatabaseURL: dbUrl,
@@ -44,10 +42,8 @@ func Firebase() (*firebase.App, error) {
 }
 
 // Call this function to get a client for the realtime database
-func RealtimeDatabase() (*db.Client, error) {
-	ctx := context.Background()
-
-	app, err := Firebase()
+func RealtimeDatabase(ctx context.Context) (*db.Client, error) {
+	app, err := Firebase(ctx)
 
 	if err != nil {
 		log.Fatalln("error in initializing firebase app: ", err)
@@ -62,10 +58,8 @@ func RealtimeDatabase() (*db.Client, error) {
 }
 
 // Call this function to get a client for the firestore database
-func Firestore() (*firestore.Client, error) {
-	ctx := context.Background()
-
-	app, err := Firebase()
+func Firestore(ctx context.Context) (*firestore.Client, error) {
+	app, err := Firebase(ctx)
 
 	if err != nil {
 		log.Fatalln("error in initializing firebase app: ", err)
@@ -82,7 +76,7 @@ func Firestore() (*firestore.Client, error) {
 // GetServer reads and returns a server document, given a server ID.
 func GetServer(ctx context.Context, id string) (types.Server, error) {
 	// Create the firestore client.
-	client, err := Firestore()
+	client, err := Firestore(ctx)
 	if err != nil {
 		return types.Server{}, fmt.Errorf("error creating Firestore client:\n%v", err)
 	}
@@ -107,7 +101,7 @@ func GetServer(ctx context.Context, id string) (types.Server, error) {
 // SetServer creates and overwrites fields in the server document, given a Server.
 func SetServer(ctx context.Context, id string, server types.Server) (types.Server, error) {
 	// Create the firestore client.
-	client, err := Firestore()
+	client, err := Firestore(ctx)
 	if err != nil {
 		return types.Server{}, fmt.Errorf("error creating Firestore client:\n%v", err)
 	}
