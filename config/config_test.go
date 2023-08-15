@@ -99,6 +99,8 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
+// TestGetId calls GetId,
+// checking for an id in return.
 func TestGetId(t *testing.T) {
 	// Cleanup at the end of the test.
 	t.Cleanup(func() {
