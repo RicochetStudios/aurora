@@ -16,7 +16,6 @@ var configPath string = "/aurora-config.json"
 type Config struct {
 	ID        string `json:"id" yaml:"id" xml:"id" form:"id"`                             // The identifier of the server.
 	ClusterID string `json:"clusterId" yaml:"clusterId" xml:"clusterId" form:"clusterId"` // The cluster this instance belongs to.
-	// Server    types.Server `json:"server" yaml:"server" xml:"server" form:"server"`             // The server configuration.
 }
 
 // Update creates or modifies config properties.
