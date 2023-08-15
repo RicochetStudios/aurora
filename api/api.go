@@ -14,20 +14,14 @@ func Start() {
 
 	api := app.Group("/api")
 
+	// Run the status router.
+	routes.StatusRouter(api)
+
+	// Run the setup router.
+	routes.SetupRouter(api)
+
 	// Run the server router.
 	routes.ServerRouter(api)
-
-	// Hit test
-	api.Get("/", routes.HitTest)
-
-	// Setup application.
-	api.Post("/setup", routes.Setup)
-
-	// Update date into firebase (TESTING)
-	api.Post("/server/firebase", routes.UpdateServerFromFirebase)
-
-	// Get data from firebase (TESTING)
-	api.Get("/server/firebase", routes.GetServerFromFirebase)
 
 	// Start the API.
 	log.Fatal(app.Listen(":6969"))

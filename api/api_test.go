@@ -14,16 +14,18 @@ import (
 	"github.com/gofiber/utils"
 )
 
-// go test -run -v Test_Handler
-func Test_HitTest(t *testing.T) {
+// TestHitTest calls HitTest with a GET method,
+// checking for a valid status in response.
+func TestHitTest(t *testing.T) {
 	app := fiber.New()
 	app.Use(cors.New())
 
 	// set routes
-	app.Get("/", routes.HitTest)
+	api := app.Group("/api")
+	routes.StatusRouter(api)
 
 	// set request
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest("GET", "/api", nil)
 	req.Header.Set("Content-Type", "application/json")
 
 	// call api
@@ -35,6 +37,8 @@ func Test_HitTest(t *testing.T) {
 	if resp.StatusCode == fiber.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		// Test 2 if body return current time (API is working)
-		utils.AssertEqual(t, "Everything seems to be working, time is "+time.Now().Format("2006-01-02 15:04:05"), string(body), "Body")
+		var want string = `{"data":{"type":"healthy","message":"Everything seems to be working, time is ` +
+			time.Now().Format("2006-01-02 15:04:05") + `"},"error":null,"status":true}`
+		utils.AssertEqual(t, want, string(body), "Body")
 	}
 }
