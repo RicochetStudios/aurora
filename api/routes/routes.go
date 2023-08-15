@@ -6,7 +6,6 @@ import (
 
 	"ricochet/aurora/api/services"
 	"ricochet/aurora/config"
-	"ricochet/aurora/types"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -32,42 +31,6 @@ func Setup(c *fiber.Ctx) error {
 	config = services.Setup(config)
 
 	return c.JSON(config)
-}
-
-// METHOD: POST
-// ROUTE: /server
-// DESC: Get server details
-func GetServer(c *fiber.Ctx) error {
-	server := services.GetServer(c)
-	return c.JSON(server)
-}
-
-// METHOD: PUT
-// ROUTE: /server
-// DESC: Update server details
-func UpdateServer(c *fiber.Ctx) error {
-	var server types.Server
-
-	// Check for errors in body.
-	if err := c.BodyParser(&server); err != nil {
-		log.Fatalf("Error in provided body: \n%v", err)
-	}
-
-	server = services.UpdateServer(c, server)
-
-	return c.JSON(server)
-}
-
-// METHOD: DELETE
-// ROUTE: /server
-// DESC: Delete server
-func RemoveServer(c *fiber.Ctx) error {
-	services.RemoveServer(c)
-
-	// Return success if the server is deleted.
-	return c.JSON(struct {
-		Status string `json:"status"`
-	}{Status: "success"})
 }
 
 // TESTING
