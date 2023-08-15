@@ -5,8 +5,6 @@ import (
 	"log"
 	"os"
 	"ricochet/aurora/api"
-
-	"github.com/docker/docker/client"
 )
 
 func main() {
@@ -17,13 +15,6 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Print(path)
-
-	// Constructs the client object.
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cli.Close()
 
 	// Start the API.
 	api.Start()

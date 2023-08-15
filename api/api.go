@@ -17,6 +17,9 @@ func Start() {
 	// Hit test
 	api.Get("/", routes.HitTest)
 
+	// Setup application.
+	api.Post("/setup", routes.Setup)
+
 	// Get server details.
 	api.Post("/server", routes.GetServer)
 

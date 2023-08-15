@@ -2,10 +2,7 @@ module ricochet/aurora
 
 go 1.20
 
-require (
-	github.com/docker/docker v24.0.5+incompatible
-	ricochet/aurora/api v0.0.0-00010101000000-000000000000
-)
+require ricochet/aurora/api v0.0.0-00010101000000-000000000000
 
 require (
 	cloud.google.com/go v0.110.7 // indirect
@@ -21,6 +18,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
+	github.com/docker/docker v24.0.5+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/gofiber/fiber/v2 v2.48.0 // indirect

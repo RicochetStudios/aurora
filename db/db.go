@@ -2,7 +2,9 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"ricochet/aurora/types"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go/v4"
@@ -10,15 +12,26 @@ import (
 	"google.golang.org/api/option"
 )
 
+const (
+	// instancePath is the path to the instance documents.
+	instancePath string = "default/instances/"
+
+	// dbUrl is the url for the Firebase database instance.
+	dbUrl string = "https://game-server-e2c56-default-rtdb.europe-west1.firebasedatabase.app"
+
+	// dbAuth is the authentication config path, used to access firebase.
+	dbAuth string = "./firebase-config.json"
+)
+
 // Call this function to get/initialise the firebase app
 func Firebase(ctx context.Context) (*firebase.App, error) {
 	// configure database URL
 	conf := &firebase.Config{
-		DatabaseURL: "https://game-server-e2c56-default-rtdb.europe-west1.firebasedatabase.app",
+		DatabaseURL: dbUrl,
 	}
 
 	// fetch service account key
-	opt := option.WithCredentialsFile("config/firebase-config.json")
+	opt := option.WithCredentialsFile(dbAuth)
 
 	app, err := firebase.NewApp(ctx, conf, opt)
 	if err != nil {
@@ -58,4 +71,47 @@ func Firestore(ctx context.Context) (*firestore.Client, error) {
 	}
 
 	return client, err
+}
+
+// GetServer reads and returns a server document, given a server ID.
+func GetServer(ctx context.Context, id string) (types.Server, error) {
+	// Create the firestore client.
+	client, err := Firestore(ctx)
+	if err != nil {
+		return types.Server{}, fmt.Errorf("error creating Firestore client:\n%v", err)
+	}
+	defer client.Close()
+
+	// Read the full document from the database.
+	// Temporarily hardcoding the collection, this needs to be changed to reflect the cluster it belongs to later.
+	document, err := client.Collection("development").Doc(instancePath + id).Get(ctx)
+	if err != nil {
+		return types.Server{}, fmt.Errorf("error writing to Firestore database:\n%v", err)
+	}
+
+	// Convert the document into the server struct.
+	var server types.Server
+	if err := document.DataTo(&server); err != nil {
+		return types.Server{}, fmt.Errorf("error converting Firestore document to types.Server struct:\n%v", err)
+	}
+
+	return server, nil
+}
+
+// SetServer creates and overwrites fields in the server document, given a Server.
+func SetServer(ctx context.Context, id string, server types.Server) (types.Server, error) {
+	// Create the firestore client.
+	client, err := Firestore(ctx)
+	if err != nil {
+		return types.Server{}, fmt.Errorf("error creating Firestore client:\n%v", err)
+	}
+	defer client.Close()
+
+	// Write to the database, overwriting existing fields and creating new ones.
+	// Temporarily hardcoding the collection, this needs to be changed to reflect the cluster it belongs to later.
+	if _, err := client.Collection("development").Doc(instancePath+id).Set(ctx, server); err != nil {
+		return types.Server{}, fmt.Errorf("error writing to Firestore database:\n%v", err)
+	}
+
+	return server, nil
 }
