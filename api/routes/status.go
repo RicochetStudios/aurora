@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"ricochet/aurora/api/services"
+	"github.com/RicochetStudios/aurora/api/services"
 
 	"github.com/gofiber/fiber/v2"
 )

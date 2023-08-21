@@ -7,7 +7,8 @@ import (
 	"io"
 	"os"
 	"regexp"
-	"ricochet/aurora/schema"
+
+	"github.com/RicochetStudios/aurora/schema"
 
 	dockerTypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"

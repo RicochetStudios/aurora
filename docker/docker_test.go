@@ -3,8 +3,9 @@ package docker
 import (
 	"context"
 	"fmt"
-	"ricochet/aurora/schema"
 	"testing"
+
+	"github.com/RicochetStudios/aurora/schema"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"

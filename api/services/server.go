@@ -3,12 +3,13 @@ package services
 import (
 	"fmt"
 	"net/http"
-	"ricochet/aurora/api/presenter"
-	"ricochet/aurora/config"
-	"ricochet/aurora/db"
-	"ricochet/aurora/docker"
-	"ricochet/aurora/schema"
-	"ricochet/aurora/types"
+
+	"github.com/RicochetStudios/aurora/api/presenter"
+	"github.com/RicochetStudios/aurora/config"
+	"github.com/RicochetStudios/aurora/db"
+	"github.com/RicochetStudios/aurora/docker"
+	"github.com/RicochetStudios/aurora/schema"
+	"github.com/RicochetStudios/aurora/types"
 
 	"github.com/gofiber/fiber/v2"
 )

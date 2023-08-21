@@ -1,7 +1,7 @@
 package presenter
 
 import (
-	"ricochet/aurora/types"
+	"github.com/RicochetStudios/aurora/types"
 
 	"github.com/gofiber/fiber/v2"
 )
