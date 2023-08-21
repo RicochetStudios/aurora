@@ -44,7 +44,8 @@
 				"ms-vscode.powershell",
 				"esbenp.prettier-vscode",
 				"redhat.vscode-yaml",
-				"vscode-icons-team.vscode-icons"
+				"vscode-icons-team.vscode-icons",
+				"ms-vscode.makefile-tools"
 			]
 		}
 	}
