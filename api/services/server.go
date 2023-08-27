@@ -17,15 +17,19 @@ import (
 // GetServer gets details about the currently configured game server instance.
 func GetServer() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		// Read the config file.
-		config, err := config.Read()
+		// Get instance ID.
+		id, err := config.GetId()
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
-			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error reading config: \n%v", err)))
+			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error getting config id: \n%v", err)))
+		} else if len(id) == 0 {
+			// Return empty.
+			ctx.Status(http.StatusOK)
+			return ctx.JSON(presenter.ServerEmptyResponse())
 		}
 
 		// Read the current server configuration.
-		server, err := db.GetServer(ctx.Context(), config.ID)
+		server, err := db.GetServer(ctx.Context(), id)
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error reading server details from the database: \n%v", err)))
@@ -67,7 +71,7 @@ func UpdateServer() fiber.Handler {
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error deploying container: \n%v", err)))
 		}
 
-		// Read the config file.
+		// Get instance ID.
 		id, err := config.GetId()
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
@@ -98,11 +102,15 @@ func RemoveServer() fiber.Handler {
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error removing container: \n%v", err)))
 		}
 
-		// Read the config file.
+		// Get instance ID.
 		id, err := config.GetId()
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error getting config id: \n%v", err)))
+		} else if len(id) == 0 {
+			// Return empty.
+			ctx.Status(http.StatusOK)
+			return ctx.JSON(presenter.ServerSuccessResponse(&types.Server{}))
 		}
 
 		// Delete the current server configuration.
