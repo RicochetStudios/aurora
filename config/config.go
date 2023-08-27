@@ -14,7 +14,7 @@ var configPath string = "/aurora-config.json"
 
 // Config is a struct of the local, persistent configuration of this instance.
 type Config struct {
-	ID        string `json:"id" yaml:"id" xml:"id" form:"id"`                             // The identifier of the server.
+	ID        string `json:"id" yaml:"id" xml:"id" form:"id"`                             // The identifier of the instance.
 	ClusterID string `json:"clusterId" yaml:"clusterId" xml:"clusterId" form:"clusterId"` // The cluster this instance belongs to.
 }
 
