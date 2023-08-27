@@ -10,6 +10,7 @@ import (
 	"github.com/RicochetStudios/aurora/docker"
 	"github.com/RicochetStudios/aurora/schema"
 	"github.com/RicochetStudios/aurora/types"
+	"github.com/google/uuid"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -23,7 +24,7 @@ func GetServer() fiber.Handler {
 			ctx.Status(http.StatusInternalServerError)
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error getting config id: \n%v", err)))
 		} else if len(id) == 0 {
-			// Return empty.
+			// Return empty if no ID is set.
 			ctx.Status(http.StatusOK)
 			return ctx.JSON(presenter.ServerEmptyResponse())
 		}
@@ -75,7 +76,16 @@ func UpdateServer() fiber.Handler {
 		id, err := config.GetId()
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
-			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error getting config id: \n%v", err)))
+			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error reading from config: \n%v", err)))
+		} else if len(id) == 0 {
+			// If no ID is set, create one.
+			id = uuid.New().String()
+
+			// Add or update the instance ID in the config.
+			if _, err = config.UpdateId(id); err != nil {
+				ctx.Status(http.StatusInternalServerError)
+				return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error updating id in config: \n%v", err)))
+			}
 		}
 
 		// Add the server status.
@@ -106,18 +116,24 @@ func RemoveServer() fiber.Handler {
 		id, err := config.GetId()
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
-			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error getting config id: \n%v", err)))
+			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error reading from config: \n%v", err)))
 		} else if len(id) == 0 {
-			// Return empty.
+			// Return empty if no ID is set.
 			ctx.Status(http.StatusOK)
-			return ctx.JSON(presenter.ServerSuccessResponse(&types.Server{}))
+			return ctx.JSON(presenter.ServerEmptyResponse())
 		}
 
 		// Delete the current server configuration.
-		_, err = db.SetServer(ctx.Context(), id, types.Server{Status: "deallocated"})
+		if err = db.RemoveServer(ctx.Context(), id); err != nil {
+			ctx.Status(http.StatusInternalServerError)
+			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error removing instance from the database: \n%v", err)))
+		}
+
+		// Remove instance ID from the config.
+		_, err = config.UpdateId("")
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
-			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error updating server details in the database: \n%v", err)))
+			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error removing instance ID from config: \n%v", err)))
 		}
 
 		// Return success if the server is deleted.
