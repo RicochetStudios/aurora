@@ -36,11 +36,11 @@ settings:
   - name: EULA
     value: "TRUE"
   - name: TYPE
-    value: "{{ .Values.game.modLoader }}"
+    value: "{{ game.modLoader }}"
   - name: MAX_PLAYERS
-    value: "{{ .size.players }}"
+    value: "{{ size.players }}"
   - name: MOTD
-    value: "{{ .Values.name }}"
+    value: "{{ name }}"
 volumes:
   - name: data
     path: "/data"

@@ -14,6 +14,7 @@ type Network struct {
 
 // Server is a set of useful details about a game server instance.
 type Server struct {
+	Name    string  `json:"name" yaml:"name" xml:"name" form:"name"`             // In game name of the server. Useful if the server is public.
 	Size    string  `json:"size" yaml:"size" xml:"size" form:"size"`             // Scale of the server. Effects the resources allocated.
 	Game    Game    `json:"game" yaml:"game" xml:"game" form:"game"`             // Details about the video game that the server is hosting.
 	Network Network `json:"network" yaml:"network" xml:"network" form:"network"` // Networking configuration of the server.
