@@ -161,15 +161,34 @@ func RemoveServer(ctx context.Context) error {
 }
 
 // // GetServer gets details about the currently configured game server instance.
-// func GetServer(ctx context.Context, cli *client.Client, containerID string) (types.Server, error) {
-// 	// containers, err := cli.ContainerList(ctx, types.ContainerListOptions{
-// 	// 	Filters: filters.NewArgs(filters.Arg("id", containerID)),
-// 	// })
-// 	// if err != nil {
-// 	// 	return resp, err
-// 	// }
+// func GetServer(ctx context.Context, containerID string) (ContainerConfig, error) {
+// 	// Constructs the client object.
+// 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+// 	if err != nil {
+// 		return ContainerConfig{}, err
+// 	}
+// 	defer cli.Close()
 
-// 	// for _, container := range containers {
-// 	// 	fmt.Printf("%s %s\n", container.ID[:10], container.Image)
-// 	// }
+// 	// Get the latest container (the only one).
+// 	containers, err := cli.ContainerList(ctx, dockerTypes.ContainerListOptions{
+// 		Latest: true,
+// 		All:    true,
+// 	})
+// 	if err != nil {
+// 		return ContainerConfig{}, err
+// 	}
+
+// 	var c dockerTypes.Container = containers[0]
+
+// 	return ContainerConfig{
+// 		Name:  c.Names[0],
+// 		Image: c.Image,
+
+// 		// Types are different.
+// 		// ExposedPorts: c.Ports,
+// 		// Binds:        c.Mounts,
+
+// 		// Environment vars can't be returned.
+// 		// Env:          envList,
+// 	}, err
 // }

@@ -52,6 +52,13 @@ func UpdateServer() fiber.Handler {
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error in provided body: \n%v", err)))
 		}
 
+		// Get instance ID.
+		id, err := config.GetId()
+		if err != nil {
+			ctx.Status(http.StatusInternalServerError)
+			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error reading from config: \n%v", err)))
+		}
+
 		// Get the game schema.
 		schema, err := schema.GetSchema("minecraft_java")
 		if err != nil {
@@ -66,20 +73,15 @@ func UpdateServer() fiber.Handler {
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error creating container config: \n%v", err)))
 		}
 
-		// Deploy and start the container.
-		if _, err := docker.RunServer(ctx.Context(), containerConfig); err != nil {
-			ctx.Status(http.StatusInternalServerError)
-			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error deploying container: \n%v", err)))
-		}
-
-		// Get instance ID.
-		id, err := config.GetId()
-		if err != nil {
-			ctx.Status(http.StatusInternalServerError)
-			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error reading from config: \n%v", err)))
-		} else if len(id) == 0 {
-			// If no ID is set, create one.
+		// If no ID is set, create an id and container.
+		if len(id) == 0 {
 			id = uuid.New().String()
+
+			// Deploy and start the container.
+			if _, err := docker.RunServer(ctx.Context(), containerConfig); err != nil {
+				ctx.Status(http.StatusInternalServerError)
+				return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error deploying container: \n%v", err)))
+			}
 
 			// Add or update the instance ID in the config.
 			if _, err = config.UpdateId(id); err != nil {
