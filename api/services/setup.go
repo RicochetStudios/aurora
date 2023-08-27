@@ -3,8 +3,9 @@ package services
 import (
 	"fmt"
 	"net/http"
-	"ricochet/aurora/api/presenter"
-	"ricochet/aurora/config"
+
+	"github.com/RicochetStudios/aurora/api/presenter"
+	"github.com/RicochetStudios/aurora/config"
 
 	"github.com/gofiber/fiber/v2"
 )

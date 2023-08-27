@@ -1,4 +1,4 @@
-module ricochet/aurora/schema
+module github.com/RicochetStudios/aurora/schema
 
 go 1.20
 

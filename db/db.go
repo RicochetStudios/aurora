@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"ricochet/aurora/types"
+
+	"github.com/RicochetStudios/aurora/types"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go/v4"

@@ -2,7 +2,8 @@ package api
 
 import (
 	"log"
-	"ricochet/aurora/api/routes"
+
+	"github.com/RicochetStudios/aurora/api/routes"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

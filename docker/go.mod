@@ -1,4 +1,4 @@
-module ricochet/aurora/docker
+module github.com/RicochetStudios/aurora/docker
 
 go 1.20
 
@@ -27,4 +27,4 @@ require (
 	gotest.tools/v3 v3.5.0 // indirect
 )
 
-replace ricochet/aurora/types => ../types
+replace github.com/RicochetStudios/aurora/types => ../types

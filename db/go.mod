@@ -1,4 +1,4 @@
-module ricochet/aurora/db
+module github.com/RicochetStudios/aurora/db
 
 go 1.20
 

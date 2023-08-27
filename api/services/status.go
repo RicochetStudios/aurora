@@ -1,8 +1,9 @@
 package services
 
 import (
-	"ricochet/aurora/api/presenter"
 	"time"
+
+	"github.com/RicochetStudios/aurora/api/presenter"
 
 	"github.com/gofiber/fiber/v2"
 )

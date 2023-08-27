@@ -1,4 +1,4 @@
-module ricochet/aurora/config
+module github.com/RicochetStudios/aurora/config
 
 go 1.20
 

@@ -1,4 +1,4 @@
-module ricochet/aurora/api
+module github.com/RicochetStudios/aurora/api
 
 go 1.20
 
