@@ -14,7 +14,7 @@ var configPath string = "/aurora-config.json"
 
 // Config is a struct of the local, persistent configuration of this instance.
 type Config struct {
-	ID        string `json:"id" yaml:"id" xml:"id" form:"id"`                             // The identifier of the server.
+	ID        string `json:"id" yaml:"id" xml:"id" form:"id"`                             // The identifier of the instance.
 	ClusterID string `json:"clusterId" yaml:"clusterId" xml:"clusterId" form:"clusterId"` // The cluster this instance belongs to.
 }
 
@@ -82,10 +82,30 @@ func GetId() (string, error) {
 	// Read the existing config.
 	config, err := Read()
 	if err != nil {
-		return "", fmt.Errorf("Update() error reading config: %v", err)
+		return "", fmt.Errorf("GetId() error reading config: %v", err)
 	}
 
 	return config.ID, nil
+}
+
+// UpdateId updates the instance id in the config, given an id.
+func UpdateId(id string) (Config, error) {
+	// Read the existing config.
+	cfg, err := Read()
+	if err != nil {
+		return Config{}, fmt.Errorf("UpdateId() error reading config: %v", err)
+	}
+
+	// Replace the ID.
+	cfg.ID = id
+
+	// Update the config with changes.
+	cfg, err = Update(cfg)
+	if err != nil {
+		return Config{}, fmt.Errorf("UpdateId() error updating config: %v", err)
+	}
+
+	return cfg, nil
 }
 
 // getFile returns the config file.

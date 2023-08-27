@@ -15,6 +15,15 @@ func ServerSuccessResponse(data *types.Server) *fiber.Map {
 	}
 }
 
+// ServerEmptyResponse is a successful response where no server is found that will be passed in the response by handler.
+func ServerEmptyResponse() *fiber.Map {
+	return &fiber.Map{
+		"status": true,
+		"data":   "",
+		"error":  nil,
+	}
+}
+
 // ServerErrorResponse is the singular ErrorResponse that will be passed in the response by handler.
 func ServerErrorResponse(err error) *fiber.Map {
 	return &fiber.Map{

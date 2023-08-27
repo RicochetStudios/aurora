@@ -74,7 +74,7 @@ func Firestore(ctx context.Context) (*firestore.Client, error) {
 	return client, err
 }
 
-// GetServer reads and returns a server document, given a server ID.
+// GetServer reads and returns a server document, given an ID.
 func GetServer(ctx context.Context, id string) (types.Server, error) {
 	// Create the firestore client.
 	client, err := Firestore(ctx)
@@ -87,7 +87,7 @@ func GetServer(ctx context.Context, id string) (types.Server, error) {
 	// Temporarily hardcoding the collection, this needs to be changed to reflect the cluster it belongs to later.
 	document, err := client.Collection("development").Doc(instancePath + id).Get(ctx)
 	if err != nil {
-		return types.Server{}, fmt.Errorf("error writing to Firestore database:\n%v", err)
+		return types.Server{}, fmt.Errorf("error reading document from Firestore database:\n%v", err)
 	}
 
 	// Convert the document into the server struct.
@@ -111,8 +111,26 @@ func SetServer(ctx context.Context, id string, server types.Server) (types.Serve
 	// Write to the database, overwriting existing fields and creating new ones.
 	// Temporarily hardcoding the collection, this needs to be changed to reflect the cluster it belongs to later.
 	if _, err := client.Collection("development").Doc(instancePath+id).Set(ctx, server); err != nil {
-		return types.Server{}, fmt.Errorf("error writing to Firestore database:\n%v", err)
+		return types.Server{}, fmt.Errorf("error writing to document in Firestore database:\n%v", err)
 	}
 
 	return server, nil
+}
+
+// RemoveServer removes an instance document from the database, given an ID.
+func RemoveServer(ctx context.Context, id string) error {
+	// Create the firestore client.
+	client, err := Firestore(ctx)
+	if err != nil {
+		return fmt.Errorf("error creating Firestore client:\n%v", err)
+	}
+	defer client.Close()
+
+	// Removing the server instance from the database by deleting the corresponding document.
+	// Temporarily hardcoding the collection, this needs to be changed to reflect the cluster it belongs to later.
+	if _, err := client.Collection("development").Doc(instancePath + id).Delete(ctx); err != nil {
+		return fmt.Errorf("error deleting document from Firestore database:\n%v", err)
+	}
+
+	return nil
 }

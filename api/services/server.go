@@ -10,6 +10,7 @@ import (
 	"github.com/RicochetStudios/aurora/docker"
 	"github.com/RicochetStudios/aurora/schema"
 	"github.com/RicochetStudios/aurora/types"
+	"github.com/google/uuid"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,15 +18,19 @@ import (
 // GetServer gets details about the currently configured game server instance.
 func GetServer() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		// Read the config file.
-		config, err := config.Read()
+		// Get instance ID.
+		id, err := config.GetId()
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
-			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error reading config: \n%v", err)))
+			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error getting config id: \n%v", err)))
+		} else if len(id) == 0 {
+			// Return empty if no ID is set.
+			ctx.Status(http.StatusOK)
+			return ctx.JSON(presenter.ServerEmptyResponse())
 		}
 
 		// Read the current server configuration.
-		server, err := db.GetServer(ctx.Context(), config.ID)
+		server, err := db.GetServer(ctx.Context(), id)
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error reading server details from the database: \n%v", err)))
@@ -47,6 +52,13 @@ func UpdateServer() fiber.Handler {
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error in provided body: \n%v", err)))
 		}
 
+		// Get instance ID.
+		id, err := config.GetId()
+		if err != nil {
+			ctx.Status(http.StatusInternalServerError)
+			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error reading from config: \n%v", err)))
+		}
+
 		// Get the game schema.
 		schema, err := schema.GetSchema("minecraft_java")
 		if err != nil {
@@ -61,17 +73,21 @@ func UpdateServer() fiber.Handler {
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error creating container config: \n%v", err)))
 		}
 
-		// Deploy and start the container.
-		if _, err := docker.RunServer(ctx.Context(), containerConfig); err != nil {
-			ctx.Status(http.StatusInternalServerError)
-			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error deploying container: \n%v", err)))
-		}
+		// If no ID is set, create an id and container.
+		if len(id) == 0 {
+			id = uuid.New().String()
 
-		// Read the config file.
-		id, err := config.GetId()
-		if err != nil {
-			ctx.Status(http.StatusInternalServerError)
-			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error getting config id: \n%v", err)))
+			// Deploy and start the container.
+			if _, err := docker.RunServer(ctx.Context(), containerConfig); err != nil {
+				ctx.Status(http.StatusInternalServerError)
+				return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error deploying container: \n%v", err)))
+			}
+
+			// Add or update the instance ID in the config.
+			if _, err = config.UpdateId(id); err != nil {
+				ctx.Status(http.StatusInternalServerError)
+				return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error updating id in config: \n%v", err)))
+			}
 		}
 
 		// Add the server status.
@@ -98,18 +114,28 @@ func RemoveServer() fiber.Handler {
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error removing container: \n%v", err)))
 		}
 
-		// Read the config file.
+		// Get instance ID.
 		id, err := config.GetId()
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
-			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error getting config id: \n%v", err)))
+			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error reading from config: \n%v", err)))
+		} else if len(id) == 0 {
+			// Return empty if no ID is set.
+			ctx.Status(http.StatusOK)
+			return ctx.JSON(presenter.ServerEmptyResponse())
 		}
 
 		// Delete the current server configuration.
-		_, err = db.SetServer(ctx.Context(), id, types.Server{Status: "deallocated"})
+		if err = db.RemoveServer(ctx.Context(), id); err != nil {
+			ctx.Status(http.StatusInternalServerError)
+			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error removing instance from the database: \n%v", err)))
+		}
+
+		// Remove instance ID from the config.
+		_, err = config.UpdateId("")
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
-			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error updating server details in the database: \n%v", err)))
+			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error removing instance ID from config: \n%v", err)))
 		}
 
 		// Return success if the server is deleted.

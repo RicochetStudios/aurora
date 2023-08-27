@@ -21,8 +21,8 @@ func Setup() fiber.Handler {
 			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error in provided body: \n%v", err)))
 		}
 
-		// Add or update the instance ID and cluster ID in the config.
-		newConfig, err := config.Update(newConfig)
+		// Add or update the cluster ID in the config.
+		newConfig, err := config.Update(config.Config{ClusterID: newConfig.ClusterID})
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
 			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error updating local config: \n%v", err)))

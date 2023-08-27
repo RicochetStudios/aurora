@@ -105,7 +105,7 @@ func TestGetId(t *testing.T) {
 	// Cleanup at the end of the test.
 	t.Cleanup(func() {
 		if err := cleanup(); err != nil {
-			t.Fatalf("TestUpdate() (create) error cleaning up:\n%v", err)
+			t.Fatalf("TestGetId() error cleaning up:\n%v", err)
 		}
 	})
 
@@ -125,6 +125,36 @@ func TestGetId(t *testing.T) {
 	}
 	if got != want {
 		t.Fatalf("TestGetId() = %q, %v, want match for %#q, nil", got, err, want)
+	}
+}
+
+// TestUpdateId calls UpdateId with an id,
+// checking the id was updated.
+func TestUpdateId(t *testing.T) {
+	// Cleanup at the end of the test.
+	t.Cleanup(func() {
+		if err := cleanup(); err != nil {
+			t.Fatalf("TestUpdateId() error cleaning up:\n%v", err)
+		}
+	})
+
+	var want string = "00000002"
+
+	// Setup the config file.
+	if _, err := Update(Config{
+		ID: "00000001",
+	}); err != nil {
+		t.Fatalf("TestUpdateId() error setting up the config: \n%v", err)
+	}
+
+	// Update the id.
+	got, err := UpdateId("00000002")
+
+	if err != nil {
+		t.Fatalf("TestUpdateId() error updating the id in the config: \n%v", err)
+	}
+	if got.ID != want {
+		t.Fatalf("TestUpdateId() = %q, %v, want match for %#q, nil", got, err, want)
 	}
 }
 
