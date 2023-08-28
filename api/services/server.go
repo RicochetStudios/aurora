@@ -91,7 +91,6 @@ func UpdateServer() fiber.Handler {
 		}
 
 		// Add the server details.
-		server.Name = containerConfig.Name
 		server.Status = "running"
 
 		// Create or update the current server configuration.
