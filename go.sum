@@ -14,6 +14,8 @@ cloud.google.com/go/longrunning v0.5.1 h1:Fr7TXftcqTudoyRJa113hyaqlGdiBQkp0Gq7tE
 cloud.google.com/go/longrunning v0.5.1/go.mod h1:spvimkwdz6SPWKEt/XBij79E9fiTkHSQl/fRUUQJYJc=
 cloud.google.com/go/storage v1.31.0 h1:+S3LjjEN2zZ+L5hOwj4+1OkGCsLVe0NzpXKQ1pSdTCI=
 cloud.google.com/go/storage v1.31.0/go.mod h1:81ams1PrhW16L4kF7qg+4mTq7SRs5HsbDTM0bWvrwJ0=
+dario.cat/mergo v1.0.0 h1:AGCNq9Evsj31mOgNPcLyXc+4PNABt905YmuqPYYpBWk=
+dario.cat/mergo v1.0.0/go.mod h1:uNxQE+84aUszobStD9th8a29P2fMDhsBdgRYvZOxGmk=
 firebase.google.com/go/v4 v4.12.0 h1:I6dCkcWUMFNkFdWgzlf8SLWecQnKdFgJhMv5fT9l1qI=
 firebase.google.com/go/v4 v4.12.0/go.mod h1:60c36dWLK4+j05Vw5XMllek3b3PCynU3BfI46OSwsUE=
 github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 h1:UQHMgLO+TxOElx5B5HZ4hJQsoJ/PvUvKRhJHDQXO8P8=
@@ -23,6 +25,18 @@ github.com/MicahParks/keyfunc v1.9.0 h1:lhKd5xrFHLNOWrDc4Tyb/Q1AJ4LCzQ48GVJyVIID
 github.com/MicahParks/keyfunc v1.9.0/go.mod h1:IdnCilugA0O/99dW+/MkvlyrsX8+L8+x95xuVNtM5jw=
 github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migciow=
 github.com/Microsoft/go-winio v0.6.1/go.mod h1:LRdKpFKfdobln8UmuiYcKPot9D2v6svN5+sAH+4kjUM=
+github.com/RicochetStudios/aurora/api v0.0.0-20230827183424-cfaf993d6834 h1:g2/SX7absh+OK6va3pAjIC4yE6CUvuaUScow9pU7umo=
+github.com/RicochetStudios/aurora/api v0.0.0-20230827183424-cfaf993d6834/go.mod h1:9NKId7UywlYJ/1FdIZAS7c7LgSEIP5vywksH4SAtWc8=
+github.com/RicochetStudios/aurora/config v0.0.0-20230827183424-cfaf993d6834 h1:9q0G2/e6ILbsiKqRiqRlXolYJxolzGP9hX+Z3CUL6CE=
+github.com/RicochetStudios/aurora/config v0.0.0-20230827183424-cfaf993d6834/go.mod h1:peiC/0w3cNom0m6MvYbkmLFy0MW5lTXXyAfP1yszryw=
+github.com/RicochetStudios/aurora/db v0.0.0-20230827183424-cfaf993d6834 h1:SL5ibUmfjwsH+/IN5X3+WiwwfaS1ZTFby8EoU9r1rwQ=
+github.com/RicochetStudios/aurora/db v0.0.0-20230827183424-cfaf993d6834/go.mod h1:jITdG86wq7Ttrf2fQWy0aReDdwkN+LjvuBzsajP63/U=
+github.com/RicochetStudios/aurora/docker v0.0.0-20230827183424-cfaf993d6834 h1:hfnju1NoPYTdgUahqCVtSAn/L9t5bUrqjjqW0gf+Q1s=
+github.com/RicochetStudios/aurora/docker v0.0.0-20230827183424-cfaf993d6834/go.mod h1:SkX4GGnBZiRAd846aM688y8/kzyVXiEoAgVILPcu96M=
+github.com/RicochetStudios/aurora/schema v0.0.0-20230827183424-cfaf993d6834 h1:lPC9nz2L2kcEyeOwUAQlAbz0IcDBwdhsczNVQUJcHfc=
+github.com/RicochetStudios/aurora/schema v0.0.0-20230827183424-cfaf993d6834/go.mod h1:PTf6Z/hCvNzUg5DxQmeE0nNlZdk4Kk1rHmJP2UgYPs0=
+github.com/RicochetStudios/aurora/types v0.0.0-20230827183424-cfaf993d6834 h1:9C+kNBT9gYJayq6zcXzvdrJeM6OHrce+XAZRFBvSB3w=
+github.com/RicochetStudios/aurora/types v0.0.0-20230827183424-cfaf993d6834/go.mod h1:OUBV/IGatMSapWiUZQoxZLO23GEAuA1V2g/OMda7uZc=
 github.com/andybalholm/brotli v1.0.5 h1:8uQZIdzKmjc/iuPu7O2ioW48L81FgatrcpfFmiq/cCs=
 github.com/andybalholm/brotli v1.0.5/go.mod h1:fO7iG3H7G2nSZ7m0zPUDn85XEX2GTukHGRSepvi9Eig=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
@@ -280,6 +294,7 @@ google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp0
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 google.golang.org/protobuf v1.31.0 h1:g0LDEJHgrBl9N9r17Ru3sqWhkIx2NB67okBHPwC7hs8=
 google.golang.org/protobuf v1.31.0/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.3/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=

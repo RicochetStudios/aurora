@@ -2,7 +2,7 @@ module github.com/RicochetStudios/aurora
 
 go 1.20
 
-require ricochet/aurora/api v0.0.0-00010101000000-000000000000
+require github.com/RicochetStudios/aurora/api v0.0.0-20230827183424-cfaf993d6834
 
 require (
 	cloud.google.com/go v0.110.7 // indirect
@@ -12,10 +12,16 @@ require (
 	cloud.google.com/go/iam v1.1.1 // indirect
 	cloud.google.com/go/longrunning v0.5.1 // indirect
 	cloud.google.com/go/storage v1.31.0 // indirect
+	dario.cat/mergo v1.0.0 // indirect
 	firebase.google.com/go/v4 v4.12.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/MicahParks/keyfunc v1.9.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
+	github.com/RicochetStudios/aurora/config v0.0.0-20230827183424-cfaf993d6834 // indirect
+	github.com/RicochetStudios/aurora/db v0.0.0-20230827183424-cfaf993d6834 // indirect
+	github.com/RicochetStudios/aurora/docker v0.0.0-20230827183424-cfaf993d6834 // indirect
+	github.com/RicochetStudios/aurora/schema v0.0.0-20230827183424-cfaf993d6834 // indirect
+	github.com/RicochetStudios/aurora/types v0.0.0-20230827183424-cfaf993d6834 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/docker v24.0.5+incompatible // indirect
@@ -61,12 +67,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230731190214-cbb8c96f2d6d // indirect
 	google.golang.org/grpc v1.57.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
-	ricochet/aurora/db v0.0.0-00010101000000-000000000000 // indirect
-	ricochet/aurora/docker v0.0.0-00010101000000-000000000000 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace ricochet/aurora/api => ./api
-
-replace ricochet/aurora/docker => ./docker
-
-replace ricochet/aurora/db => ./db
