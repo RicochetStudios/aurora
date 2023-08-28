@@ -13,36 +13,36 @@ func TestGetSchema(t *testing.T) {
 		Image: "itzg/minecraft-server:latest",
 		URL:   "https://github.com/itzg/docker-minecraft-server",
 		Ratio: "1-2",
-		Sizes: Sizes{
-			XS: Size{
+		Sizes: map[string]Size{
+			"xs": {
 				Resources: Resources{
 					CPU:    "1000m",
 					Memory: "2000Mi",
 				},
 				Players: 8,
 			},
-			S: Size{
+			"s": {
 				Resources: Resources{
 					CPU:    "1500m",
 					Memory: "4000Mi",
 				},
 				Players: 16,
 			},
-			M: Size{
+			"m": {
 				Resources: Resources{
 					CPU:    "2000m",
 					Memory: "8000Mi",
 				},
 				Players: 32,
 			},
-			L: Size{
+			"l": {
 				Resources: Resources{
 					CPU:    "3000m",
 					Memory: "16000Mi",
 				},
 				Players: 64,
 			},
-			XL: Size{
+			"xl": {
 				Resources: Resources{
 					CPU:    "4000m",
 					Memory: "32000Mi",
@@ -50,6 +50,43 @@ func TestGetSchema(t *testing.T) {
 				Players: 128,
 			},
 		},
+		// Sizes{
+		// 	XS: Size{
+		// 		Resources: Resources{
+		// 			CPU:    "1000m",
+		// 			Memory: "2000Mi",
+		// 		},
+		// 		Players: 8,
+		// 	},
+		// 	S: Size{
+		// 		Resources: Resources{
+		// 			CPU:    "1500m",
+		// 			Memory: "4000Mi",
+		// 		},
+		// 		Players: 16,
+		// 	},
+		// 	M: Size{
+		// 		Resources: Resources{
+		// 			CPU:    "2000m",
+		// 			Memory: "8000Mi",
+		// 		},
+		// 		Players: 32,
+		// 	},
+		// 	L: Size{
+		// 		Resources: Resources{
+		// 			CPU:    "3000m",
+		// 			Memory: "16000Mi",
+		// 		},
+		// 		Players: 64,
+		// 	},
+		// 	XL: Size{
+		// 		Resources: Resources{
+		// 			CPU:    "4000m",
+		// 			Memory: "32000Mi",
+		// 		},
+		// 		Players: 128,
+		// 	},
+		// },
 		Network: []Network{
 			{
 				Name:     "game",

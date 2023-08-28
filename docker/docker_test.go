@@ -6,24 +6,15 @@ import (
 	"testing"
 
 	"github.com/RicochetStudios/aurora/schema"
+	"github.com/RicochetStudios/aurora/types"
 
-	"github.com/docker/docker/api/types"
+	dockerTypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/google/go-cmp/cmp"
 )
-
-// // TestNewServerPort calls NewServerPort with a protocol and port,
-// // checking for a valid ServerPort type to be returned.
-// func TestNewServerPort(t *testing.T) {
-// 	var want ServerPort = ServerPort{Protocol: "tcp", Port: "8080"}
-// 	got := NewServerPort("tcp", "8080")
-// 	if want != got {
-// 		t.Fatalf(`NewServerPort("tcp", "8080") = %q, want match for %#q`, got, want)
-// 	}
-// }
 
 // TestNewContainerEnvVar calls NewContainerEnvVar with a name and value,
 // checking for a valid string in return.
@@ -48,7 +39,7 @@ func TestNewContainerEnvVarInvalidName(t *testing.T) {
 // cleaupAllContainers removes all running containers, volumes and data.
 func cleaupAllContainers(ctx context.Context, cli *client.Client) error {
 	// Get all containers.
-	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
+	containers, err := cli.ContainerList(ctx, dockerTypes.ContainerListOptions{})
 	if err != nil {
 		return fmt.Errorf("cleaupAllContainers() error getting list of containers: %v", err)
 	}
@@ -56,7 +47,7 @@ func cleaupAllContainers(ctx context.Context, cli *client.Client) error {
 	// Stop and remove containers and volumes.
 	for _, instance := range containers {
 		fmt.Print("Stopping container ", instance.ID[:10], "... ")
-		if err := cli.ContainerRemove(ctx, instance.ID, types.ContainerRemoveOptions{
+		if err := cli.ContainerRemove(ctx, instance.ID, dockerTypes.ContainerRemoveOptions{
 			RemoveVolumes: true,
 			RemoveLinks:   false,
 			Force:         true,
@@ -157,24 +148,24 @@ func TestNewContainerConfigFromSchema(t *testing.T) {
 		Image: "itzg/minecraft-server:latest",
 		URL:   "https://github.com/itzg/docker-minecraft-server",
 		Ratio: "1-2",
-		Sizes: schema.Sizes{
-			XS: schema.Size{
+		Sizes: map[string]schema.Size{
+			"xs": {
 				Resources: schema.Resources{CPU: "1000m", Memory: "2000Mi"},
 				Players:   8,
 			},
-			S: schema.Size{
+			"s": {
 				Resources: schema.Resources{CPU: "1500m", Memory: "4000Mi"},
 				Players:   16,
 			},
-			M: schema.Size{
+			"m": {
 				Resources: schema.Resources{CPU: "2000m", Memory: "8000Mi"},
 				Players:   32,
 			},
-			L: schema.Size{
+			"l": {
 				Resources: schema.Resources{CPU: "3000m", Memory: "16000Mi"},
 				Players:   64,
 			},
-			XL: schema.Size{
+			"xl": {
 				Resources: schema.Resources{CPU: "4000m", Memory: "32000Mi"},
 				Players:   128,
 			},
@@ -184,9 +175,9 @@ func TestNewContainerConfigFromSchema(t *testing.T) {
 		},
 		Settings: []schema.Setting{
 			{Name: "EULA", Value: "TRUE"},
-			{Name: "TYPE", Value: "{{ .Values.game.modLoader }}"},
-			{Name: "MAX_PLAYERS", Value: "{{ .size.players }}"},
-			{Name: "MOTD", Value: "{{ .Values.name }}"},
+			{Name: "TYPE", Value: "{{ .modloader }}"},
+			{Name: "MAX_PLAYERS", Value: "{{ .players }}"},
+			{Name: "MOTD", Value: "{{ .name }}"},
 		},
 		Volumes: []schema.Volume{
 			{
@@ -219,6 +210,18 @@ func TestNewContainerConfigFromSchema(t *testing.T) {
 		},
 	}
 
+	var server types.Server = types.Server{
+		Name: "mytest",
+		Size: "xs",
+		Game: types.Game{
+			Name:      "minecraft_java",
+			Modloader: "vanilla",
+		},
+		Network: types.Network{
+			Type: "private",
+		},
+	}
+
 	var want ContainerConfig = ContainerConfig{
 		"my-unique-id",
 		"itzg/minecraft-server:latest",
@@ -226,13 +229,13 @@ func TestNewContainerConfigFromSchema(t *testing.T) {
 		[]string{"/data:/data"},
 		[]string{
 			"EULA=TRUE",
-			"TYPE={{ .Values.game.modLoader }}",
-			"MAX_PLAYERS={{ .size.players }}",
-			"MOTD={{ .Values.name }}",
+			"TYPE=vanilla",
+			"MAX_PLAYERS=8",
+			"MOTD=mytest",
 		},
 	}
 
-	got, err := NewContainerConfigFromSchema("my-unique-id", schema)
+	got, err := NewContainerConfig("my-unique-id", schema, server)
 
 	if err != nil {
 		t.Fatalf("NewContainerConfigFromSchema() returned an error: \n%v", err)

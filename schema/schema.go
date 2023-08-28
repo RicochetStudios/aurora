@@ -59,15 +59,15 @@ type Probe struct {
 }
 
 type Schema struct {
-	Name     string    `yaml:"name"`
-	Image    string    `yaml:"image"`
-	URL      string    `yaml:"url"`
-	Ratio    string    `yaml:"ratio"`
-	Sizes    Sizes     `yaml:"sizes"`
-	Network  []Network `yaml:"network"`
-	Settings []Setting `yaml:"settings"`
-	Volumes  []Volume  `yaml:"volumes"`
-	Probes   Probes    `yaml:"probes"`
+	Name     string          `yaml:"name"`
+	Image    string          `yaml:"image"`
+	URL      string          `yaml:"url"`
+	Ratio    string          `yaml:"ratio"`
+	Sizes    map[string]Size `yaml:"sizes"`
+	Network  []Network       `yaml:"network"`
+	Settings []Setting       `yaml:"settings"`
+	Volumes  []Volume        `yaml:"volumes"`
+	Probes   Probes          `yaml:"probes"`
 }
 
 // GetSchema gets a game schema from a yaml file and stores it as a Schema.
