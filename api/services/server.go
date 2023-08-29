@@ -67,7 +67,7 @@ func UpdateServer() fiber.Handler {
 		}
 
 		// Create a container config.
-		containerConfig, err := docker.NewContainerConfigFromSchema("my-unique-id", schema)
+		containerConfig, err := docker.NewContainerConfig(id, schema, server)
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
 			return ctx.JSON(presenter.ServerErrorResponse(fmt.Errorf("error creating container config: \n%v", err)))
@@ -90,7 +90,7 @@ func UpdateServer() fiber.Handler {
 			}
 		}
 
-		// Add the server status.
+		// Add the server details.
 		server.Status = "running"
 
 		// Create or update the current server configuration.

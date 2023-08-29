@@ -4,6 +4,7 @@
 		"clusterId": "00000001"
 	},
 	"server": {
+		"name": "ricochet",
 		"size": "xs",
 		"game": {
 			"name": "minecraft_java",

@@ -9,6 +9,7 @@ import (
 	"regexp"
 
 	"github.com/RicochetStudios/aurora/schema"
+	"github.com/RicochetStudios/aurora/types"
 
 	dockerTypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -16,6 +17,9 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 )
+
+// templateRegex is a regular expression to validate templates.
+const templateRegex string = `^{{ (?P<tpl>(\.\w+)*) }}$`
 
 // NewContainerEnvVar creates a new instance of ContainerEnvVar given a name and value.
 func NewContainerEnvVar(name, value string) (string, error) {
@@ -28,6 +32,7 @@ func NewContainerEnvVar(name, value string) (string, error) {
 	} else {
 		return (name + "=" + value), nil
 	}
+
 }
 
 // ContainerConfig is a set of configurations to pass to the docker engine to create the server container.
@@ -39,11 +44,35 @@ type ContainerConfig struct {
 	Env          []string
 }
 
-// NewContainerConfigFromSchema creates a new ContainerConfig from a game schema and a name.
-func NewContainerConfigFromSchema(name string, schema schema.Schema) (ContainerConfig, error) {
+// templateValue takes a value and resolves its template if it is a template.
+func templateValue(v string, g schema.Schema, s types.Server) string {
+	// Template the env var if needed.
+	re := regexp.MustCompile(templateRegex)
+	if re.MatchString(v) {
+		// Get the template to target.
+		matches := re.FindStringSubmatch(v)
+		tplIndex := re.SubexpIndex("tpl")
+		tpl := matches[tplIndex]
+
+		// Resolve the templates.
+		switch tpl {
+		case ".name":
+			return s.Name
+		case ".modloader":
+			return s.Game.Modloader
+		case ".players":
+			return fmt.Sprint(g.Sizes[s.Size].Players)
+		}
+	}
+	// If it is not a template, return the original value.
+	return v
+}
+
+// NewContainerConfig creates a new ContainerConfig from a name, game schema and a server.
+func NewContainerConfig(name string, gameSchema schema.Schema, server types.Server) (ContainerConfig, error) {
 	// Create container environment ports.
 	var portSet nat.PortSet = nat.PortSet{}
-	for _, network := range schema.Network {
+	for _, network := range gameSchema.Network {
 		port, err := nat.NewPort(
 			network.Protocol,
 			fmt.Sprint(network.Port),
@@ -56,16 +85,23 @@ func NewContainerConfigFromSchema(name string, schema schema.Schema) (ContainerC
 
 	// Create container bindings.
 	var bindList []string = []string{}
-	for _, volume := range schema.Volumes {
+	for _, volume := range gameSchema.Volumes {
 		bindList = append(bindList, (volume.Path + ":" + volume.Path))
 	}
 
 	// Create container environment variables.
 	var envList []string = []string{}
-	for _, setting := range schema.Settings {
+	for _, setting := range gameSchema.Settings {
+		// Template environment variables if required.
+		var sList [2]string = [2]string{setting.Name, setting.Value}
+		for i, item := range sList {
+			sList[i] = templateValue(item, gameSchema, server)
+		}
+
+		// Construct env vars.
 		env, err := NewContainerEnvVar(
-			setting.Name,
-			setting.Value,
+			sList[0],
+			sList[1],
 		)
 		if err != nil {
 			return ContainerConfig{}, err
@@ -76,7 +112,7 @@ func NewContainerConfigFromSchema(name string, schema schema.Schema) (ContainerC
 	// Create container config.
 	return ContainerConfig{
 		Name:         name,
-		Image:        schema.Image,
+		Image:        gameSchema.Image,
 		ExposedPorts: portSet,
 		Binds:        bindList,
 		Env:          envList,
