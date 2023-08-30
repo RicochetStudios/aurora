@@ -20,6 +20,8 @@ testschema: ## Test the schema package
 testtypes: ## Test the schema package
 		go test ./types
 
+buildall: build386 buildlinuxarm ## Build all platforms
+
 build386: ## Build for linux/386
 		GOOS=linux GOARCH=386 go install .
 
