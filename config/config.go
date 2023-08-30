@@ -10,7 +10,7 @@ import (
 )
 
 // configPath is the path to the config file.
-var configPath string = "/aurora-config.json"
+const configPath string = "/aurora-config.json"
 
 // Config is a struct of the local, persistent configuration of this instance.
 type Config struct {
