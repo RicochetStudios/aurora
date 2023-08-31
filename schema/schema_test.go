@@ -64,15 +64,15 @@ func TestGetSchema(t *testing.T) {
 			},
 			{
 				Name:  "TYPE",
-				Value: "{{ .Values.game.modLoader }}",
+				Value: "{{ .modLoader }}",
 			},
 			{
 				Name:  "MAX_PLAYERS",
-				Value: "{{ .size.players }}",
+				Value: "{{ .players }}",
 			},
 			{
 				Name:  "MOTD",
-				Value: "{{ .Values.name }}",
+				Value: "{{ .name }}",
 			},
 		},
 		Volumes: []Volume{

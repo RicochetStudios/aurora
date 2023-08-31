@@ -139,9 +139,9 @@ func TestRemoveServer(t *testing.T) {
 	}
 }
 
-// TestNewContainerConfigFromSchema calls NewContainerConfigFromSchema with correct inputs,
+// TestNewContainerConfig calls NewContainerConfig with correct inputs,
 // checking for a valid ContainerConfig in return.
-func TestNewContainerConfigFromSchema(t *testing.T) {
+func TestNewContainerConfig(t *testing.T) {
 	// Create the schema.
 	var schema schema.Schema = schema.Schema{
 		Name:  "minecraft_java",

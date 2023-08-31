@@ -26,6 +26,9 @@
 		},
 		"ghcr.io/devcontainers/features/github-cli:1": {
 			"version": "latest"
+		},
+		"ghcr.io/devcontainers-contrib/features/act:1": {
+			"version": "latest"
 		}
 	},
 	
