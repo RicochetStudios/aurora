@@ -6,7 +6,7 @@ vet: ## Run go vet
 tidy:	## Run go mod tidy
 	go mod tidy
 
-testall: ## Run all tests
+test: ## Run all tests
 	go test ./...
 
 buildall: build386 buildlinuxarm ## Build all platforms
