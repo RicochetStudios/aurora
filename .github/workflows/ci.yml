@@ -34,7 +34,7 @@ jobs:
           go-version-file: go.mod
       - name: run all tests
         run: |
-          make testall
+          make test
   
   build:
     name: build
