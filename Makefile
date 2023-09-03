@@ -1,4 +1,4 @@
-check: vet testall build386 buildlinuxarm # Perform basic checks and tests
+check: vet test build386 buildlinuxarm # Perform basic checks and tests
 
 vet: ## Run go vet
 	go vet ./...
