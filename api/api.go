@@ -24,6 +24,9 @@ func Start() {
 	// Run the server router.
 	routes.ServerRouter(api)
 
+	// Run the auth router.
+	routes.AuthRouter(api)
+
 	// Start the API.
 	log.Fatal(app.Listen(":6969"))
 }
