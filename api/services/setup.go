@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/RicochetStudios/aurora/api/middleware"
 	"github.com/RicochetStudios/aurora/api/presenter"
 	"github.com/RicochetStudios/aurora/config"
 
@@ -14,6 +15,13 @@ import (
 func Setup() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		var newConfig config.Config
+
+		// Check User Role.
+		err := middleware.ProtectRoute(ctx)
+		if err != nil {
+			ctx.Status(http.StatusForbidden)
+			return ctx.JSON(presenter.AuthErrorResponse(fmt.Errorf("error authenticating request: %v", err)))
+		}
 
 		// Check for errors in body.
 		if err := ctx.BodyParser(&newConfig); err != nil {
