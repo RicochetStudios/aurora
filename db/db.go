@@ -9,6 +9,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/auth"
 	"firebase.google.com/go/v4/db"
 	"google.golang.org/api/option"
 )
@@ -40,6 +41,32 @@ func Firebase(ctx context.Context) (*firebase.App, error) {
 	}
 
 	return app, err
+}
+
+// Call this function to get/initialise the firebase auth
+func FirebaseAuth(ctx context.Context) (*auth.Client, error) {
+	// configure database URL
+	conf := &firebase.Config{
+		DatabaseURL: dbUrl,
+	}
+
+	// fetch service account key
+	opt := option.WithCredentialsFile(dbAuth)
+
+	// initialize app
+	app, err := firebase.NewApp(ctx, conf, opt)
+	if err != nil {
+		log.Fatalln("error in initializing firebase app: ", err)
+	}
+
+	// initialize auth
+	auth, err := app.Auth(ctx)
+	if err != nil {
+		log.Fatalln("error in initializing firebase auth: ", err)
+	}
+
+	return auth, err
+
 }
 
 // Call this function to get a client for the realtime database
