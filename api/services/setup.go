@@ -30,7 +30,7 @@ func Setup() fiber.Handler {
 		}
 
 		// Add or update the cluster ID in the config.
-		newConfig, err := config.Update(config.Config{ClusterID: newConfig.ClusterID})
+		newConfig, err = config.Update(config.Config{ClusterID: newConfig.ClusterID})
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
 			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error updating local config: \n%v", err)))
