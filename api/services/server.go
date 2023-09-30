@@ -12,12 +12,22 @@ import (
 	"github.com/RicochetStudios/aurora/types"
 	"github.com/google/uuid"
 
+	"github.com/RicochetStudios/aurora/api/middleware"
+
 	"github.com/gofiber/fiber/v2"
 )
 
 // GetServer gets details about the currently configured game server instance.
 func GetServer() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+
+		// Check User Role.
+		err := middleware.ProtectRoute(ctx)
+		if err != nil {
+			ctx.Status(http.StatusForbidden)
+			return ctx.JSON(presenter.AuthErrorResponse(fmt.Errorf("error authenticating request: %v", err)))
+		}
+
 		// Get instance ID.
 		id, err := config.GetId()
 		if err != nil {
@@ -45,6 +55,13 @@ func GetServer() fiber.Handler {
 func UpdateServer() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		var server types.Server
+
+		// Check User Role.
+		err := middleware.ProtectRoute(ctx)
+		if err != nil {
+			ctx.Status(http.StatusForbidden)
+			return ctx.JSON(presenter.AuthErrorResponse(fmt.Errorf("error authenticating request: %v", err)))
+		}
 
 		// Check for errors in body.
 		if err := ctx.BodyParser(&server); err != nil {
@@ -108,6 +125,14 @@ func UpdateServer() fiber.Handler {
 // RemoveServer stops and deletes a server.
 func RemoveServer() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+
+		// Check User Role.
+		err := middleware.ProtectRoute(ctx)
+		if err != nil {
+			ctx.Status(http.StatusForbidden)
+			return ctx.JSON(presenter.AuthErrorResponse(fmt.Errorf("error authenticating request: %v", err)))
+		}
+
 		// Remove the container.
 		if err := docker.RemoveServer(ctx.Context()); err != nil {
 			ctx.Status(http.StatusInternalServerError)

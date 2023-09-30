@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/RicochetStudios/aurora/api/middleware"
 	"github.com/RicochetStudios/aurora/api/presenter"
 	"github.com/RicochetStudios/aurora/config"
 
@@ -15,6 +16,13 @@ func Setup() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		var newConfig config.Config
 
+		// Check User Role.
+		err := middleware.ProtectRoute(ctx)
+		if err != nil {
+			ctx.Status(http.StatusForbidden)
+			return ctx.JSON(presenter.AuthErrorResponse(fmt.Errorf("error authenticating request: %v", err)))
+		}
+
 		// Check for errors in body.
 		if err := ctx.BodyParser(&newConfig); err != nil {
 			ctx.Status(http.StatusInternalServerError)
@@ -22,7 +30,7 @@ func Setup() fiber.Handler {
 		}
 
 		// Add or update the cluster ID in the config.
-		newConfig, err := config.Update(config.Config{ClusterID: newConfig.ClusterID})
+		newConfig, err = config.Update(config.Config{ClusterID: newConfig.ClusterID})
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
 			return ctx.JSON(presenter.SetupErrorResponse(fmt.Errorf("error updating local config: \n%v", err)))
