@@ -9,7 +9,7 @@ type Status struct {
 	Message string `json:"message" yaml:"message" xml:"message" form:"message"` // The message returned by the api.
 }
 
-// SetupSuccessResponse is the SuccessResponse that will be passed in the response by handler.
+// StatusSuccessResponse is the SuccessResponse that will be passed in the response by handler.
 func StatusSuccessResponse(data Status) *fiber.Map {
 	return &fiber.Map{
 		"status": true,
@@ -18,11 +18,11 @@ func StatusSuccessResponse(data Status) *fiber.Map {
 	}
 }
 
-// SetupErrorResponse is the singular ErrorResponse that will be passed in the response by handler.
+// StatusErrorResponse is the singular ErrorResponse that will be passed in the response by handler.
 func StatusErrorResponse(err error) *fiber.Map {
 	return &fiber.Map{
 		"status": false,
-		"data":   "",
+		"data":   nil,
 		"error":  err.Error(),
 	}
 }

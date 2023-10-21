@@ -3,13 +3,13 @@ package services
 import (
 	"log"
 
+	"github.com/RicochetStudios/aurora/api/models"
 	"github.com/RicochetStudios/aurora/db"
-
 	"github.com/gofiber/fiber/v2"
 )
 
-// SetAuthUser will give the user access to create/delete servers
-func SetAuthUser(ctx *fiber.Ctx, uid string) (bool, error) {
+// updateUserRoles will give the user access to create/delete servers
+func updateUserRoles(ctx *fiber.Ctx, uid string) (bool, error) {
 
 	// Get an auth client from the firebase.App
 	client, err := db.FirebaseAuth(ctx.Context())
@@ -67,5 +67,67 @@ func CheckMemeber(ctx *fiber.Ctx, token string) (bool, error) {
 	} else {
 		log.Printf("User is not member")
 		return false, nil
+	}
+}
+
+func SetAuthUser() fiber.Handler {
+		return func(ctx *fiber.Ctx) error {
+		// get uid from body.
+		response := new(models.UserUid)
+
+		if err := ctx.BodyParser(response); err != nil {
+			return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"status": false,
+				"error": err.Error(),
+			})
+		}
+
+		// get uid from body.
+		uid := response.Uid
+
+		added, err := updateUserRoles(ctx, uid)
+		if err != nil {
+			return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"status": false,
+				"error": err.Error(),
+			})
+		}
+
+		return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+			"status": true,
+			"error": nil,
+			"userAdded": added,
+		})
+	}
+}
+
+func VerifyAuthUser() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		// get token from body.
+		response := new(models.UserToken)
+
+		if err := ctx.BodyParser(response); err != nil {
+			return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"status": false,
+				"error": err.Error(),
+			})
+		}
+
+		// get token from body.
+		token := response.Token
+
+		decoded, err := CheckMemeber(ctx, token)
+		if err != nil {
+			return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"status": false,
+				"error": err.Error(),
+			})
+		}
+
+		return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+			"status": true,
+			"error": nil,
+			"isMember": decoded,
+		})
 	}
 }
