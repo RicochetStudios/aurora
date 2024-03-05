@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/firestore v1.12.0
 	dario.cat/mergo v1.0.0
 	firebase.google.com/go/v4 v4.12.0
-	github.com/docker/docker v24.0.5+incompatible
+	github.com/docker/docker v24.0.7+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/gofiber/fiber/v2 v2.48.0
 	github.com/gofiber/utils v1.1.0
